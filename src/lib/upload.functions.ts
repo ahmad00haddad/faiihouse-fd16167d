@@ -31,6 +31,10 @@ export const uploadImage = createServerFn({ method: "POST" })
       .upload(path, buf, { contentType: data.contentType, upsert: false });
     if (error) throw new Error(error.message);
 
-    const { data: pub } = supabaseAdmin.storage.from("site-images").getPublicUrl(path);
-    return { url: pub.publicUrl };
+    const { data: signed, error: signErr } = await supabaseAdmin.storage
+      .from("site-images")
+      .createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+    if (signErr || !signed) throw new Error(signErr?.message ?? "Could not create image URL");
+    return { url: signed.signedUrl };
+
   });
