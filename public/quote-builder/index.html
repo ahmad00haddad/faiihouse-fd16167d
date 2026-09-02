@@ -1,0 +1,3525 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" id="htmlRoot">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Faii House — منشئ عروض الأسعار</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<style>
+@font-face {
+  font-family:"Jeddah";
+  src:url("/fonts/AFJeddah.ttf") format("truetype");
+  font-weight:400;
+  font-style:normal;
+  font-display:swap;
+}
+@font-face {
+  font-family:"LostSignal";
+  src:url("/fonts/LostSignal.otf") format("opentype");
+  font-weight:400;
+  font-style:normal;
+  font-display:swap;
+}
+:root {
+  /* Faii House design tokens */
+  --background: oklch(0.16 0.012 60);
+  --foreground: oklch(0.96 0.008 80);
+  --surface: oklch(0.20 0.015 60);
+  --surface-elevated: oklch(0.24 0.018 60);
+  --muted: oklch(0.30 0.015 60);
+  --muted-foreground: oklch(0.72 0.02 70);
+  --border: oklch(0.30 0.02 60 / 0.5);
+  --primary: oklch(0.74 0.17 55);
+  --primary-foreground: oklch(0.16 0.012 60);
+  --primary-glow: oklch(0.82 0.16 65);
+  --accent: oklch(0.74 0.17 55);
+  --accent-foreground: oklch(0.16 0.012 60);
+  --ring: oklch(0.74 0.17 55);
+
+  /* Legacy aliases for quote-builder internals */
+  --gold: var(--primary);
+  --gold-h: var(--primary-glow);
+  --gold-dim: oklch(0.74 0.17 55 / 0.12);
+  --gold-b: oklch(0.74 0.17 55 / 0.35);
+  --dark: var(--background);
+  --dark2: var(--surface);
+  --dark3: var(--surface-elevated);
+  --dark4: oklch(0.28 0.018 60);
+  --dark5: oklch(0.32 0.02 60);
+  --text: var(--foreground);
+  --text2: var(--muted-foreground);
+  --text3: oklch(0.60 0.015 70);
+  --green:#2ecc71; --red:#e74c3c; --blue:#3498db;
+  --sidebar-w:320px;
+  --t:0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-cinematic: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --radius-xl: 1.5rem;
+  --radius-lg: 1rem;
+  --radius-md: 0.625rem;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{font-size:16px;scroll-behavior:auto;}
+body{background:var(--background);color:var(--foreground);font-family:'Jeddah',system-ui,sans-serif;min-height:100vh;overflow-x:hidden;direction:rtl;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased;}
+[lang="en"] body{font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;}
+.en-only{display:none;} .ar-only{display:inline;}
+[lang="en"] .en-only{display:inline;} [lang="en"] .ar-only{display:none;}
+
+/* LAYOUT */
+.app{display:flex;min-height:100vh;}
+.main{flex:1;min-width:0;padding-bottom:80px;}
+.sidebar{width:var(--sidebar-w);flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto;background:var(--surface);border-inline-start:1px solid var(--border);}
+
+/* HEADER */
+.header{background:oklch(0.16 0.012 60 / 0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+.logo-wrap{display:flex;align-items:center;gap:12px;}
+.logo-icon{height:40px;display:flex;align-items:center;flex-shrink:0;}
+.logo-icon img{height:40px;width:auto;object-fit:contain;display:block;}
+.logo-text .sub{font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:var(--muted-foreground);transition:var(--t);}
+.logo-wrap:hover .logo-text .sub{color:var(--primary);}
+@media(max-width:640px){.logo-text{display:none;}}
+.header-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.btn-sm{padding:8px 16px;font-size:12px;font-weight:600;letter-spacing:0.5px;cursor:pointer;transition:var(--t);border:none;min-height:40px;white-space:nowrap;border-radius:9999px;display:inline-flex;align-items:center;justify-content:center;gap:6px;}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted-foreground);}
+.btn-ghost:hover{border-color:var(--primary);color:var(--primary);}
+.btn-gold{background:linear-gradient(135deg, var(--primary), var(--primary-glow));color:var(--primary-foreground);box-shadow:0 10px 30px -12px oklch(0.74 0.17 55 / 0.4);}
+.btn-gold:hover{transform:translateY(-1px);box-shadow:0 14px 36px -10px oklch(0.74 0.17 55 / 0.5);}
+.lang-btn{background:var(--surface-elevated);border:1px solid var(--border);color:var(--muted-foreground);padding:6px 12px;font-size:11px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:var(--t);border-radius:9999px;}
+.lang-btn:hover{border-color:var(--primary);color:var(--primary);}
+
+/* STEP NAV */
+.step-nav{display:flex;align-items:center;padding:0 20px;background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.step-nav::-webkit-scrollbar{height:2px;} .step-nav::-webkit-scrollbar-thumb{background:var(--primary);}
+.step-tab{display:flex;align-items:center;gap:8px;padding:14px 16px;cursor:pointer;border-bottom:2px solid transparent;transition:var(--t);white-space:nowrap;color:var(--text3);font-size:13px;font-weight:500;min-height:44px;flex-shrink:0;}
+.step-tab.active{color:var(--primary);border-bottom-color:var(--primary);}
+.step-tab.done{color:var(--foreground);}
+.step-num{width:22px;height:22px;border-radius:50%;border:1.5px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;}
+.step-tab.done .step-num{background:var(--primary);border-color:var(--primary);color:var(--primary-foreground);}
+.step-tab.active .step-num{background:var(--gold-dim);border-color:var(--primary);}
+
+/* SECTION */
+.section{padding:28px 32px;display:none;opacity:0;transform:translateY(15px);}
+.section.active{display:block;animation:slideFade 0.5s cubic-bezier(0.2,0.8,0.2,1) forwards;}
+@keyframes slideFade{to{opacity:1;transform:translateY(0);}}
+.section-head{margin-bottom:24px;}
+.section-head h1,.section-head h2{font-family:'LostSignal','Jeddah',serif;font-size:26px;font-weight:400;color:var(--foreground);line-height:1.15;}
+.section-head p{font-size:14px;color:var(--muted-foreground);margin-top:6px;}
+
+/* PROJECT TYPE CARDS */
+.type-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:20px;}
+.type-card{background:var(--surface-elevated);border:1px solid var(--border);border-radius:var(--radius-lg);padding:22px 16px;text-align:center;cursor:pointer;transition:var(--t);position:relative;overflow:hidden;}
+.type-card::after{content:'';position:absolute;top:0;inset-inline-start:0;inset-inline-end:0;height:2px;background:var(--primary);transform:scaleX(0);transition:var(--t);}
+.type-card:hover{border-color:var(--gold-b);background:var(--dark4);}
+.type-card:hover::after,.type-card.sel::after{transform:scaleX(1);}
+.type-card.sel{border-color:var(--primary);background:oklch(0.74 0.17 55 / 0.10);}
+.type-icon{font-size:28px;margin-bottom:10px;display:block;}
+.type-name{font-size:14px;font-weight:600;color:var(--foreground);margin-bottom:3px;}
+.type-range{font-size:11px;color:var(--muted-foreground);}
+
+/* REEL PACK UI */
+.reel-pack-box{background:var(--surface-elevated);border:1px solid var(--gold-b);border-inline-start:3px solid var(--primary);border-radius:var(--radius-lg);padding:18px 22px;margin-bottom:20px;display:none;}
+.reel-pack-box.show{display:block;}
+.reel-breakdown{display:flex;gap:14px;flex-wrap:wrap;margin-top:14px;}
+.reel-tier{background:var(--dark4);border-radius:var(--radius-md);padding:12px 18px;text-align:center;min-width:120px;}
+.reel-tier .rt-label{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:4px;}
+.reel-tier .rt-price{font-family:'LostSignal','Jeddah',serif;font-size:20px;font-weight:400;color:var(--primary);}
+.reel-tier .rt-save{font-size:11px;color:var(--green);margin-top:2px;}
+.reel-tier.active-tier{border:1px solid var(--primary);}
+.pack-notice{background:rgba(46,204,113,0.08);border:1px solid rgba(46,204,113,0.2);border-radius:var(--radius-md);padding:10px 14px;font-size:12px;color:var(--green);margin-top:10px;display:none;}
+.pack-notice.show{display:flex;align-items:center;gap:8px;}
+
+/* FORM */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+.form-group{display:flex;flex-direction:column;gap:6px;}
+.form-group.full{grid-column:1/-1;}
+label{font-size:11px;font-weight:600;color:var(--text3);letter-spacing:0.5px;text-transform:uppercase;}
+input[type=text],input[type=date],input[type=number],select,textarea{background:var(--surface-elevated);border:1px solid var(--border);border-radius:var(--radius-md);color:var(--foreground);font-family:inherit;font-size:14px;padding:11px 14px;outline:none;transition:var(--t);width:100%;}
+[lang="en"] input,[lang="en"] select,[lang="en"] textarea{font-family:system-ui,sans-serif;}
+input:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 4px oklch(0.74 0.17 55 / 0.12);}
+select option{background:var(--surface-elevated);}
+textarea{resize:vertical;min-height:80px;}
+
+/* CREW TABLE */
+.crew-table{width:100%;border-collapse:collapse;margin-bottom:14px;}
+.crew-table th{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text3);padding:10px 14px;text-align:start;background:var(--surface-elevated);border-bottom:1px solid var(--gold-b);white-space:nowrap;}
+.crew-table td{padding:10px 12px;border-bottom:1px solid var(--border);font-size:14px;vertical-align:middle;}
+.crew-table tr:hover td{background:var(--dark4);}
+.crew-table input[type=number]{width:72px;background:var(--dark4);border:1px solid var(--border);border-radius:var(--radius-md);color:var(--foreground);font-size:13px;padding:5px 8px;text-align:center;}
+.crew-table input[type=number]:focus{border-color:var(--primary);}
+.crew-table input[type=checkbox]{width:16px;height:16px;cursor:pointer;accent-color:var(--primary);}
+.qty-ctrl{display:flex;align-items:center;gap:4px;}
+.qty-ctrl button{background:var(--dark4);border:1px solid var(--border);border-radius:var(--radius-md);color:var(--text2);width:28px;height:28px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:var(--t);flex-shrink:0;}
+.qty-ctrl button:hover{border-color:var(--primary);color:var(--primary);}
+.qty-ctrl span{min-width:24px;text-align:center;font-size:13px;font-weight:600;}
+.role-name{font-weight:600;color:var(--foreground);font-size:14px;}
+.role-name-ar{font-size:12px;color:var(--text3);font-family:'Jeddah',sans-serif;}
+.add-role-btn{background:transparent;border:1px dashed var(--border);border-radius:var(--radius-lg);color:var(--text3);padding:12px;width:100%;font-family:inherit;font-size:13px;cursor:pointer;transition:var(--t);display:flex;align-items:center;justify-content:center;gap:6px;min-height:48px;}
+.add-role-btn:hover{border-color:var(--primary);color:var(--primary);}
+.warn-badge{background:rgba(231,76,60,0.12);border:1px solid rgba(231,76,60,0.3);color:#e74c3c;font-size:10px;padding:2px 8px;display:inline-block;margin-inline-start:6px;}
+.crew-disabled{opacity:0.4;pointer-events:none;}
+
+/* DAYS SELECTOR */
+.days-selector{display:flex;align-items:center;gap:16px;margin-bottom:18px;flex-wrap:wrap;}
+.days-selector label{font-size:14px;color:var(--text2);}
+.days-input{display:flex;align-items:center;gap:8px;}
+.days-input button{background:var(--surface-elevated);border:1px solid var(--border);border-radius:var(--radius-md);color:var(--foreground);width:40px;height:40px;font-size:20px;cursor:pointer;transition:var(--t);display:flex;align-items:center;justify-content:center;min-height:44px;min-width:44px;}
+.days-input button:hover{border-color:var(--primary);color:var(--primary);}
+.days-input span{font-family:'LostSignal','Jeddah',serif;font-size:28px;font-weight:400;color:var(--primary);min-width:40px;text-align:center;}
+.days-hint{font-size:12px;color:var(--text3);background:var(--surface-elevated);border-radius:var(--radius-md);padding:4px 10px;display:none;}
+.days-hint.show{display:inline-block;}
+
+/* EQUIPMENT */
+.equip-mode-toggle{display:flex;margin-bottom:18px;border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;}
+.equip-mode-btn{flex:1;padding:10px;font-size:12px;font-weight:600;letter-spacing:0.5px;cursor:pointer;border:none;background:transparent;color:var(--text3);transition:var(--t);text-transform:uppercase;}
+.equip-mode-btn.active{background:var(--primary);color:var(--primary-foreground);}
+.equip-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin-bottom:16px;}
+.equip-card{background:var(--surface-elevated);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;cursor:pointer;transition:var(--t);}
+.equip-card:hover{border-color:var(--gold-b);}
+.equip-card.sel{border-color:var(--primary);background:oklch(0.74 0.17 55 / 0.10);}
+.equip-tier{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--primary);margin-bottom:4px;}
+.equip-name{font-size:15px;font-weight:600;color:var(--foreground);margin-bottom:4px;}
+.equip-list{font-size:12px;color:var(--muted-foreground);line-height:1.7;}
+.equip-price{font-family:'LostSignal','Jeddah',serif;font-size:22px;font-weight:400;color:var(--primary);margin-top:10px;}
+/* Individual items */
+.equip-cat{margin-bottom:18px;}
+.equip-cat-title{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--primary);padding:6px 0;border-bottom:1px solid var(--gold-b);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.equip-cat-icon{font-size:16px;}
+.equip-items-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;}
+.equip-item{display:flex;align-items:center;gap:10px;background:var(--surface-elevated);border:1px solid var(--border);border-radius:var(--radius-md);padding:10px 12px;cursor:pointer;transition:var(--t);}
+.equip-item:hover{border-color:var(--gold-b);}
+.equip-item.sel{border-color:var(--primary);background:oklch(0.74 0.17 55 / 0.10);}
+.equip-item input[type=checkbox]{accent-color:var(--primary);width:15px;height:15px;flex-shrink:0;}
+.ei-info{flex:1;min-width:0;}
+.ei-name{font-size:13px;font-weight:500;color:var(--foreground);}
+.ei-name-ar{font-size:11px;color:var(--text3);font-family:'Jeddah',sans-serif;}
+.ei-rate{font-family:'LostSignal','Jeddah',serif;font-size:14px;font-weight:400;color:var(--primary);flex-shrink:0;}
+.equip-total-bar{background:var(--surface-elevated);border:1px solid var(--gold-b);border-radius:var(--radius-md);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-top:12px;}
+.equip-total-bar span{font-size:12px;color:var(--text3);}
+.equip-total-bar strong{font-family:'LostSignal','Jeddah',serif;font-size:20px;color:var(--primary);}
+
+/* POST-PRODUCTION */
+.post-options{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:14px;}
+.post-option{display:flex;align-items:center;justify-content:space-between;background:var(--surface-elevated);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 16px;cursor:pointer;transition:var(--t);}
+.post-option:hover{border-color:var(--gold-b);}
+.post-option.sel{border-color:var(--primary);background:oklch(0.74 0.17 55 / 0.10);}
+.post-option.disabled-opt{opacity:0.4;pointer-events:none;border-style:dashed;}
+.post-option-left{display:flex;align-items:center;gap:10px;}
+.post-option input[type=checkbox]{accent-color:var(--primary);}
+.post-option-name{font-size:14px;font-weight:600;color:var(--foreground);}
+.post-option-desc{font-size:12px;color:var(--muted-foreground);}
+.post-price{font-family:'LostSignal','Jeddah',serif;font-size:15px;font-weight:400;color:var(--primary);white-space:nowrap;}
+.disabled-note{font-size:10px;color:var(--text3);background:var(--dark4);padding:3px 8px;margin-top:2px;display:inline-block;}
+
+/* LOCATION */
+.region-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:10px;}
+.region-card{background:var(--surface-elevated);border:1px solid var(--border);border-radius:var(--radius-lg);padding:15px;text-align:center;cursor:pointer;transition:var(--t);}
+.region-card:hover{border-color:var(--gold-b);}
+.region-card.sel{border-color:var(--primary);background:oklch(0.74 0.17 55 / 0.10);}
+.region-icon{font-size:24px;margin-bottom:6px;}
+.region-name{font-size:14px;font-weight:600;color:var(--foreground);margin-bottom:3px;}
+.region-cities{font-size:10px;color:var(--muted-foreground);line-height:1.5;}
+.region-fee{font-size:12px;color:var(--primary);margin-top:5px;font-weight:600;}
+
+/* BADGES */
+.badge{font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:3px 8px;font-weight:600;display:inline-block;border-radius:9999px;}
+.badge-gold{background:var(--gold-dim);color:var(--primary);border:1px solid var(--gold-b);}
+.badge-green{background:rgba(46,204,113,0.15);color:#2ecc71;border:1px solid rgba(46,204,113,0.3);}
+.badge-red{background:rgba(231,76,60,0.12);color:#e74c3c;border:1px solid rgba(231,76,60,0.3);}
+
+/* DISCOUNT BAR */
+.discount-bar{background:rgba(46,204,113,0.07);border:1px solid rgba(46,204,113,0.2);border-radius:var(--radius-md);padding:11px 15px;display:none;align-items:center;gap:10px;margin-bottom:14px;}
+.discount-bar.show{display:flex;}
+.d-icon{font-size:16px;}
+.d-text{font-size:12px;color:var(--text2);flex:1;}
+.d-val{font-weight:700;color:var(--green);font-size:13px;}
+
+/* NAV BUTTONS */
+.step-nav-btns{display:flex;justify-content:space-between;margin-top:28px;gap:10px;}
+
+/* SIDEBAR */
+.sb-header{padding:20px 18px 16px;border-bottom:1px solid var(--border);}
+.sb-title{font-family:'LostSignal','Jeddah',serif;font-size:18px;font-weight:400;color:var(--foreground);}
+.sb-subtitle{font-size:10px;color:var(--muted-foreground);margin-top:2px;letter-spacing:1px;text-transform:uppercase;}
+.sb-body{padding:16px 18px;}
+.sb-section{margin-bottom:14px;}
+.sb-section-title{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:7px;padding-bottom:5px;border-bottom:1px solid var(--border);}
+.sb-line{display:flex;justify-content:space-between;align-items:flex-start;padding:4px 0;font-size:12px;gap:8px;}
+.sb-line-label{color:var(--text2);flex:1;min-width:0;line-height:1.4;}
+.sb-line-val{font-weight:600;color:var(--foreground);font-family:'LostSignal','Jeddah',serif;white-space:nowrap;}
+.sb-line-val.muted{color:var(--text3);font-family:system-ui,sans-serif;font-weight:400;font-size:11px;}
+.sb-divider{border:none;border-top:1px solid var(--border);margin:10px 0;}
+.sb-total{display:flex;justify-content:space-between;align-items:flex-end;padding:10px 0;}
+.sb-total-label{font-size:12px;color:var(--text3);}
+.sb-total-old{font-size:13px;color:var(--text3);text-decoration:line-through;font-family:'LostSignal','Jeddah',serif;}
+.sb-total-new{font-family:'LostSignal','Jeddah',serif;font-size:28px;font-weight:400;color:var(--primary);line-height:1;}
+.sb-discount-badge{background:rgba(46,204,113,0.15);border:1px solid rgba(46,204,113,0.3);color:var(--green);font-size:10px;font-weight:700;letter-spacing:1px;padding:2px 8px;text-transform:uppercase;margin-top:3px;display:inline-block;}
+.sb-cta{padding:14px 18px;border-top:1px solid var(--border);}
+.btn-full{width:100%;padding:13px;font-size:13px;font-weight:700;cursor:pointer;transition:var(--t);border:none;letter-spacing:0.5px;text-transform:uppercase;min-height:48px;white-space:nowrap;border-radius:9999px;display:inline-flex;align-items:center;justify-content:center;gap:6px;}
+.btn-generate{background:linear-gradient(135deg, var(--primary), var(--primary-glow));color:var(--primary-foreground);margin-bottom:8px;}
+.btn-generate:hover{transform:translateY(-1px);box-shadow:0 14px 36px -10px oklch(0.74 0.17 55 / 0.5);}
+.btn-wa{background:rgba(37,211,102,0.12);border:1px solid rgba(37,211,102,0.25);color:var(--green);margin-bottom:8px;}
+.btn-wa:hover{background:rgba(37,211,102,0.22);}
+.btn-negotiate{background:rgba(212,175,55,0.08);border:1px dashed rgba(212,175,55,0.45);color:var(--primary);}
+.btn-negotiate:hover{background:rgba(212,175,55,0.18);}
+.sb-empty{text-align:center;padding:36px 18px;color:var(--text3);font-size:13px;}
+.sb-empty-icon{font-size:30px;margin-bottom:8px;display:block;}
+
+/* MOBILE */
+.mobile-quote-bar{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);padding:10px 18px;align-items:center;justify-content:space-between;z-index:40;}
+.mq-total{display:flex;flex-direction:column;}
+.mq-label{font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;}
+.mq-amount{font-family:'LostSignal','Jeddah',serif;font-size:20px;font-weight:400;color:var(--primary);}
+.mq-btn{background:linear-gradient(135deg, var(--primary), var(--primary-glow));color:var(--primary-foreground);border:none;padding:12px 18px;font-size:12px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;cursor:pointer;min-height:44px;border-radius:9999px;}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity 0.3s;}
+.modal-overlay.show{opacity:1;pointer-events:all;}
+.modal-box{background:var(--surface-elevated);border:1px solid var(--border);border-radius:var(--radius-lg);max-width:720px;width:100%;max-height:92vh;overflow-y:auto;}
+.modal-header{background:var(--surface);padding:18px 24px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);}
+.modal-header h3{font-size:15px;font-weight:600;color:var(--foreground);}
+.modal-actions{display:flex;gap:8px;}
+.modal-close{background:transparent;border:none;color:var(--text2);font-size:22px;cursor:pointer;line-height:1;transition:var(--t);}
+.modal-close:hover{color:var(--foreground);}
+
+/* QUOTE DOCUMENT */
+.quote-doc{background:var(--background);font-family:system-ui,sans-serif;}
+.q-top{background:var(--background);padding:30px 34px;}
+.q-title{font-size:44px;font-weight:400;color:var(--primary);letter-spacing:-1px;margin-bottom:3px;font-family:'LostSignal','Jeddah',serif;line-height:1;}
+.q-subtitle{font-size:15px;font-weight:400;color:var(--text2);margin-bottom:20px;}
+.q-meta{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:20px;}
+.q-meta-block p{font-size:12px;color:var(--text3);line-height:1.9;}
+.q-meta-block strong{color:var(--foreground);}
+.q-divider{height:2px;background:linear-gradient(to right,var(--primary),transparent);}
+.q-body{padding:22px 34px;}
+.q-table{width:100%;border-collapse:collapse;margin-bottom:18px;}
+.q-table th{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);padding:9px 10px;text-align:left;border-bottom:1px solid var(--border);}
+.q-table th:last-child{text-align:right;}
+.q-table td{padding:11px 10px;font-size:13px;color:var(--foreground);border-bottom:1px solid var(--border);}
+.q-table td:last-child{text-align:right;font-family:'LostSignal','Jeddah',serif;font-size:14px;color:var(--primary);}
+.q-table tr:last-child td{border-bottom:none;}
+.q-subtotal{background:var(--surface-elevated);border-radius:var(--radius-md);padding:14px 22px;display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
+.q-sub-old{font-size:13px;color:var(--text3);text-decoration:line-through;margin-inline-end:10px;}
+.q-sub-new{font-family:'LostSignal','Jeddah',serif;font-size:28px;font-weight:400;color:var(--primary);}
+.q-details{font-size:12px;color:var(--text3);line-height:2;margin-bottom:20px;}
+.q-footer{background:var(--background);padding:20px 34px;display:flex;justify-content:space-between;align-items:flex-end;}
+.q-footer-left .ty{font-family:'LostSignal','Jeddah',serif;font-size:22px;font-weight:400;color:var(--foreground);line-height:1.2;}
+.q-footer-left .ty span{color:var(--primary);}
+.q-footer-left .contact{font-size:11px;color:var(--text3);margin-top:6px;line-height:1.8;}
+.q-footer-right{text-align:right;}
+.q-footer-right .send{font-family:'LostSignal','Jeddah',serif;font-size:22px;font-weight:400;color:var(--foreground);line-height:1.2;}
+.q-footer-right .cliq{font-size:11px;color:var(--text3);margin-top:6px;line-height:1.8;}
+
+/* FILM GRAIN HOVER — matches main site cards */
+.grain-card{position:relative;overflow:hidden;isolation:isolate;}
+.grain-card::after{
+  content:"";
+  position:absolute;
+  inset:-20%;
+  pointer-events:none;
+  z-index:3;
+  opacity:0;
+  mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 0.85  0 0 0 0 0.55  0 0 0 0.9 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-size:220px 220px;
+  transition:opacity .35s ease;
+  animation:grainShift 1.6s steps(6) infinite;
+}
+.grain-card:hover::after{opacity:0.55;}
+.grain-card::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  z-index:2;
+  opacity:0;
+  background:
+    radial-gradient(circle at 50% 50%, transparent 55%, rgba(0,0,0,0.55) 100%),
+    linear-gradient(180deg, rgba(255,180,90,0.08), transparent 30%, transparent 70%, rgba(255,140,60,0.06));
+  transition:opacity .4s ease;
+}
+.grain-card:hover::before{opacity:1;}
+
+@keyframes grainShift{
+  0%,100%{transform:translate(0,0);}
+  10%{transform:translate(-2%,-1%);}
+  30%{transform:translate(1%,2%);}
+  50%{transform:translate(-1%,3%);}
+  70%{transform:translate(2%,-2%);}
+  90%{transform:translate(-3%,1%);}
+}
+
+/* RESPONSIVE: ≤ 900px */
+@media(max-width:900px){
+  .sidebar{display:none;}
+  .mobile-quote-bar{display:flex;}
+  .form-grid{grid-template-columns:1fr;}
+  .equip-grid{grid-template-columns:1fr 1fr;}
+  .type-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));}
+  .q-meta{grid-template-columns:1fr 1fr;}
+  .section{padding:20px;}
+  /* Prevent content hiding behind mobile bar */
+  .main{padding-bottom:100px;}
+}
+@media(max-width:500px){
+  .type-grid{grid-template-columns:1fr 1fr;}
+  .equip-grid{grid-template-columns:1fr;}
+  .equip-items-grid{grid-template-columns:1fr;}
+  .region-grid{grid-template-columns:1fr 1fr;}
+  .q-meta{grid-template-columns:1fr;}
+  .header { padding: 12px 16px; justify-content: space-between; }
+  .header-right { gap: 6px; }
+  
+  /* Hide unnecessary buttons in the header on mobile to keep it elegant and clean */
+  .header-right #btnGenerate, 
+  .header-right #btnTourHelp { display: none !important; }
+  
+  /* Convert Reset button to an elegant icon */
+  .header-right #btnReset { font-size: 0 !important; letter-spacing: 0; }
+  .header-right #btnReset::after { content: "🔄"; font-size: 16px; display:block; line-height:1; }
+  .header-right #btnReset { padding: 8px 12px; min-height: 0; background: var(--surface-elevated); border: 1px solid var(--border); border-radius: 9999px; }
+
+  
+  /* Convert Home button to an elegant icon */
+  .header-right a[href="/"] .ar-only, 
+  .header-right a[href="/"] .en-only { display: none !important; }
+  .header-right a[href="/"]::after { content: "🏠"; font-size: 16px; display:block; line-height:1; }
+  .header-right a[href="/"] { padding: 8px 12px; min-height: 0; background: var(--surface-elevated); border: 1px solid var(--border); border-radius: 9999px; }
+  
+  /* Adjust the logo size slightly to fit perfectly */
+  .logo-text .sub { font-size: 7px !important; letter-spacing: 1.5px; margin-top: 1px; }
+  .logo-icon img { height: 18px !important; }
+  .step-tab span{display:none;}
+  .step-tab{padding:12px 10px;}
+  .crew-table{font-size:12px;}
+  .section:not(.owner-mode) .crew-table th:nth-child(3){display:none;}
+  .section:not(.owner-mode) .crew-table td:nth-child(3){display:none;}
+  .reel-breakdown{gap:10px;}
+  /* Better touch targets on small screens */
+  .type-card{padding:14px 10px;}
+  .region-card{padding:10px 8px;}
+  .post-option{padding:11px 12px;}
+  .step-nav-btns{flex-wrap:wrap;}
+  .step-nav-btns .btn-sm{flex:1;min-width:120px;}
+}
+
+/* OWNER MODE */
+.owner-mode-indicator{
+  display:none;
+  align-items:center;gap:8px;
+  background:oklch(0.74 0.17 55 / 0.10);
+  border:1px solid var(--gold-b);
+  border-radius:9999px;
+  padding:7px 14px;
+  font-size:11px;color:var(--primary);
+  letter-spacing:0.5px;
+}
+.owner-mode-indicator.show{display:flex;}
+.owner-mode-dot{width:7px;height:7px;border-radius:50%;background:var(--primary);animation:pulse-dot 1.6s infinite;}
+@keyframes pulse-dot{0%,100%{opacity:1;}50%{opacity:0.3;}}
+@keyframes shake{0%,100%{transform:translateX(0);}20%,60%{transform:translateX(-6px);}40%,80%{transform:translateX(6px);}}
+.owner-exit-btn{
+  margin-inline-start:auto;background:transparent;border:none;
+  color:var(--text3);font-size:11px;cursor:pointer;padding:0;
+  letter-spacing:0.5px;text-transform:uppercase;
+}
+.owner-exit-btn:hover{color:var(--red);}
+
+/* Rate cell — locked vs editable */
+.rate-display{
+  font-family:'LostSignal','Jeddah',serif;font-size:14px;
+  font-weight:400;color:var(--primary);padding:5px 8px;
+  min-width:72px;display:inline-block;text-align:center;
+}
+.owner-mode .rate-display{display:none;}
+.rate-input-wrap{display:none;}
+.owner-mode .rate-input-wrap{display:block;}
+
+/* Hide add-custom-role btn for clients */
+.add-role-btn-wrap{display:none;}
+.owner-mode .add-role-btn-wrap{display:block;}
+
+/* INTERNAL MODALS (custom role, alert, confirm) */
+.int-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:2000;display:flex;align-items:center;justify-content:center;padding:20px;}
+.int-modal-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.6);}
+.int-modal-header{background:var(--background);padding:18px 22px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);}
+.int-modal-body{padding:22px;}
+.int-modal-footer{display:flex;border-top:1px solid var(--border);}
+.int-modal-footer button{flex:1;padding:14px;font-size:13px;font-weight:600;cursor:pointer;border:none;}
+.int-modal-footer button:not(:last-child){border-inline-end:1px solid var(--border);}
+.int-modal-close-btn{background:transparent;border:none;color:var(--text2);font-size:22px;cursor:pointer;line-height:1;padding:0;}
+.int-modal-close-btn:hover{color:var(--foreground);}
+
+/* PRINT */
+@media print{
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
+  html,body{background:white!important;}
+  .header,.step-nav,.sidebar,.mobile-quote-bar,.modal-header,.modal-actions,.section:not(.print-target){display:none!important;}
+  .app,.main{display:block!important;}
+  .modal-overlay{position:static!important;opacity:1!important;background:none!important;padding:0!important;pointer-events:all!important;}
+  .modal-box{max-height:none!important;box-shadow:none!important;border:none!important;max-width:100%!important;}
+  .quote-doc{background:white!important;color:#111!important;}
+  .q-top{background:#f5f5f5!important;color:#111!important;}
+  .q-title{color:var(--primary)!important;}
+  .q-subtitle{color:#555!important;}
+  .q-meta-block p,.q-meta-block strong{color:#333!important;}
+  .q-table th{color:#555!important;border-bottom:1px solid #ccc!important;}
+  .q-table td{color:#222!important;border-bottom:1px solid #eee!important;}
+  .q-table td:last-child{color:var(--primary)!important;}
+  .q-subtotal{background:#f9f9f9!important;}
+  .q-sub-new{color:var(--primary)!important;}
+  .q-sub-old{color:#888!important;}
+  .q-details{color:#555!important;}
+  .q-footer{background:#f5f5f5!important;}
+  .q-footer-left .ty,.q-footer-right .send{color:#111!important;}
+  .q-footer-left .ty span{color:var(--primary)!important;}
+  .q-footer-left .contact,.q-footer-right .cliq{color:#555!important;}
+  .q-divider{background:linear-gradient(to right,var(--primary),transparent)!important;}
+}
+/* ═══ Micro-interactions ═══ */
+.type-card,.equip-card,.region-card,.post-option,.reel-tier{transition:transform .28s cubic-bezier(.2,.8,.2,1),border-color .28s,background .28s,box-shadow .28s;}
+.type-card:hover,.equip-card:hover,.region-card:hover,.post-option:hover{transform:translateY(-3px);}
+.type-card:active,.equip-card:active,.region-card:active,.post-option:active{transform:scale(.975);}
+.btn-sm,.btn-full,.mq-btn,.lang-btn{transition:transform .2s cubic-bezier(.2,.8,.2,1),box-shadow .25s,background .25s,color .25s;}
+.btn-sm:active,.btn-full:active,.mq-btn:active,.lang-btn:active{transform:scale(.96);}
+.seg-ctrl{display:flex;background:var(--surface-elevated);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;padding:4px;gap:4px;}
+.seg-btn{flex:1;background:transparent;border:none;border-radius:6px;padding:8px 0;font-size:12px;font-weight:600;color:var(--text3);cursor:pointer;transition:var(--t);}
+.seg-btn.active{background:var(--primary);color:var(--primary-foreground);box-shadow:0 4px 12px rgba(0,0,0,0.2);}
+@keyframes shake-error{0%,100%{transform:translateX(0);}20%,60%{transform:translateX(-5px);}40%,80%{transform:translateX(5px);}}
+.shake-error{animation:shake-error 0.4s ease;border-color:var(--red)!important;}
+.btn-full:hover,.mq-btn:hover{transform:translateY(-1px);}
+.step-tab{position:relative;}
+.step-tab:hover{color:var(--foreground);}
+.step-tab::after{content:"";position:absolute;inset-inline:12px;bottom:-2px;height:2px;background:var(--primary);transform:scaleX(0);transform-origin:center;transition:transform .3s cubic-bezier(.2,.8,.2,1);}
+.step-tab:hover::after{transform:scaleX(1);}
+.sb-total-bump{animation:totalBump .45s cubic-bezier(.2,.8,.2,1);}
+@keyframes totalBump{0%{transform:scale(1);}40%{transform:scale(1.07);}100%{transform:scale(1);}}
+.btn-negotiate{position:relative;}
+.btn-negotiate .neg-ico{display:inline-block;transition:transform .35s cubic-bezier(.2,.8,.2,1);}
+.btn-negotiate:hover .neg-ico{transform:rotate(-12deg) scale(1.15);}
+
+/* ═══ Contextual hints ═══ */
+.hint{position:relative;display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;margin-inline-start:6px;border-radius:50%;border:1px solid var(--border2);color:var(--text3);font-size:10px;font-weight:700;cursor:help;vertical-align:middle;transition:var(--t);}
+.hint:hover{border-color:var(--primary);color:var(--primary);}
+.hint::after{content:attr(data-hint);position:absolute;bottom:130%;inset-inline-end:-4px;width:max-content;max-width:230px;padding:8px 10px;border-radius:10px;background:var(--surface-elevated,var(--surface));border:1px solid var(--border2);color:var(--text2);font-size:11px;font-weight:400;line-height:1.6;text-align:start;opacity:0;transform:translateY(4px);pointer-events:none;transition:opacity .22s,transform .22s;box-shadow:0 12px 30px -12px rgba(0,0,0,.6);z-index:70;}
+.hint:hover::after,.hint:focus-visible::after,.hint.active::after{opacity:1;transform:none;}
+
+/* ═══ Onboarding walkthrough ═══ */
+.tour-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:200;opacity:0;transition:opacity .3s;}
+.tour-backdrop.show{opacity:1;}
+.tour-ring{position:fixed;z-index:201;border:2px solid var(--primary);border-radius:14px;box-shadow:0 0 0 9999px rgba(0,0,0,.68),0 0 30px rgba(212,175,55,.35);transition:all .4s cubic-bezier(.2,.8,.2,1);pointer-events:none;}
+.tour-card{position:fixed;z-index:202;width:min(320px,calc(100vw - 32px));background:var(--surface);border:1px solid var(--border2);border-radius:18px;padding:18px;box-shadow:0 30px 80px -30px rgba(0,0,0,.8);transition:all .4s cubic-bezier(.2,.8,.2,1);}
+.tour-step{font-size:10px;letter-spacing:.28em;color:var(--primary);margin-bottom:8px;}
+.tour-title{font-family:'LostSignal','Jeddah',serif;font-size:18px;color:var(--foreground);margin-bottom:6px;}
+.tour-text{font-size:12.5px;line-height:1.8;color:var(--text2);}
+.tour-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:16px;}
+.tour-skip{background:none;border:none;color:var(--text3);font-size:11.5px;cursor:pointer;font-family:inherit;}
+.tour-skip:hover{color:var(--text2);}
+.tour-next{padding:9px 18px;border:none;border-radius:9999px;background:linear-gradient(135deg,var(--primary),var(--primary-glow,var(--primary)));color:var(--primary-foreground);font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;}
+.tour-dots{display:flex;gap:5px;}
+.tour-dots i{width:6px;height:6px;border-radius:50%;background:var(--border2);display:block;}
+.tour-dots i.on{background:var(--primary);}
+.tour-help{background:none;border:1px solid var(--border2);color:var(--text3);border-radius:9999px;padding:6px 12px;font-size:11.5px;cursor:pointer;font-family:inherit;transition:var(--t);}
+.tour-help:hover{border-color:var(--primary);color:var(--primary);}
+@media (prefers-reduced-motion: reduce){
+  .tour-ring,.tour-card{transition:none;}
+  .type-card:hover,.equip-card:hover,.region-card:hover,.post-option:hover,.btn-full:hover,.mq-btn:hover{transform:none;}
+}
+
+.badge-popular { position:absolute; top:0; right:0; background:var(--gold); color:#000; font-size:10px; padding:4px 10px; border-radius:0 10px 0 10px; font-weight:bold; box-shadow:-2px 2px 10px rgba(0,0,0,0.1); z-index:10; pointer-events:none; }
+.form-group:focus-within label { color: var(--primary); transform: translateX(4px); transition:0.3s; }
+.sidebar { overscroll-behavior: contain; }
+
+
+.owner-mode .owner-settings { display:block !important; }
+
+/* Micro-interaction: Tooltips for Roles */
+.hint-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: rgba(212,175,55,0.15);
+  color: var(--gold);
+  font-size: 10px;
+  font-weight: bold;
+  margin-right: 6px;
+  margin-left: 6px;
+  cursor: help;
+  position: relative;
+  transition: all 0.3s ease;
+}
+.hint-icon:hover {
+  background: var(--gold);
+  color: var(--background);
+  transform: scale(1.1);
+}
+.hint-tooltip {
+  position: absolute;
+  bottom: 150%;
+  right: 50%;
+  transform: translateX(50%) translateY(5px);
+  width: max-content;
+  max-width: 220px;
+  background: var(--surface-elevated);
+  border: 1px solid rgba(212,175,55,0.3);
+  padding: 10px 12px;
+  border-radius: 6px;
+  color: var(--foreground);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.5;
+  text-align: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  z-index: 100;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+  pointer-events: none;
+}
+.role-info-td:hover .hint-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) !important;
+}
+.hint-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  right: 15px; /* position it near the start of the text */
+  border-width: 5px;
+  border-style: solid;
+  border-color: var(--surface-elevated) transparent transparent transparent;
+}
+
+
+/* 1. Sidebar Pulse Micro-interaction */
+@keyframes highlightPulse {
+  0% { background: rgba(212,175,55,0.3); transform: scale(1.02); color: var(--gold); }
+  100% { background: transparent; transform: scale(1); }
+}
+.pulse-update {
+  animation: highlightPulse 1.5s ease-out forwards !important;
+  border-radius: 4px;
+  padding: 2px 6px !important;
+  margin: -2px -6px !important;
+}
+
+/* 2. Base Transitions (Focus dimming removed per user request) */
+.pt-card, .crew-table tbody tr, .post-option, .equip-card {
+  transition: all 0.2s ease-out;
+}
+
+
+/* Masterclass UX CSS */
+.ripple {
+  position: absolute; border-radius: 50%; transform: scale(0);
+  animation: ripple-anim 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  background: rgba(212,175,55,0.4); pointer-events: none; z-index: 10;
+}
+@keyframes ripple-anim { to { transform: scale(4); opacity: 0; } }
+
+@keyframes floatGhost {
+  0% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -40px) scale(1.1); }
+}
+.cost-ghost {
+  position: fixed; color: var(--green); font-weight: 700;
+  pointer-events: none; z-index: 999999;
+  animation: floatGhost 0.8s ease-out forwards;
+  text-shadow: 0 2px 5px rgba(0,0,0,0.8); font-size: 15px;
+}
+.cost-ghost.negative { color: #ff4c4c; }
+
+@media(max-width:992px) {
+  .mobile-total-bar {
+    bottom: 20px !important; left: 50% !important; transform: translateX(-50%) !important;
+    width: 92% !important; max-width: 400px !important;
+    border-radius: 50px !important; background: rgba(20, 20, 20, 0.85) !important;
+    backdrop-filter: blur(16px) !important; -webkit-backdrop-filter: blur(16px) !important;
+    border: 1px solid rgba(212,175,55,0.4) !important;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.6) !important; padding: 12px 24px !important;
+    transition: all 0.3s cubic-bezier(0.2,0.8,0.2,1) !important;
+  }
+}
+
+.dep-warn {
+  color: #ffb84d; font-size: 12px; display: inline-flex; align-items: center; 
+  margin-right: 6px; margin-left: 6px; cursor: help; animation: pulse-warn 2s infinite;
+}
+@keyframes pulse-warn { 0% { opacity:0.6; transform:scale(0.9); } 50% { opacity:1; transform:scale(1.1); } 100% { opacity:0.6; transform:scale(0.9); } }
+
+
+@media (max-width: 992px) {
+  .hint-tooltip {
+    position: fixed !important;
+    bottom: 100px !important;
+    top: auto !important;
+    left: 15px !important;
+    right: 15px !important;
+    width: auto !important;
+    max-width: none !important;
+    transform: translateY(30px) !important;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.8) !important;
+    border-radius: 12px !important;
+    font-size: 13px !important;
+    padding: 16px !important;
+    background: rgba(25, 25, 25, 0.98) !important;
+    backdrop-filter: blur(15px) !important;
+    -webkit-backdrop-filter: blur(15px) !important;
+    border: 1px solid rgba(212,175,55,0.4) !important;
+    z-index: 9999999 !important;
+    color: #fff !important;
+  }
+  .role-info-td:hover .hint-tooltip,
+  .role-info-td:active .hint-tooltip {
+    transform: translateY(0) !important;
+  }
+  .hint-tooltip::after {
+    display: none !important;
+  }
+}
+
+
+/* Phase 1 Engine CSS */
+:root { --vh: 1vh; }
+#page-transition-overlay {
+  position: fixed; top: 0; left: 0; width: 100vw; 
+  height: 100vh; height: calc(var(--vh, 1vh) * 100);
+  background-color: #0b0a0a; z-index: 999999;
+  display: flex; align-items: center; justify-content: center;
+  pointer-events: none;
+}
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: hidden; }
+.lenis.lenis-scrolling iframe { pointer-events: none; }
+
+
+/* Type Tooltip */
+.type-tooltip {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 50%;
+  transform: translateX(-50%) translateY(8px) scale(0.95);
+  background: rgba(15, 15, 15, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(212,175,55,0.3);
+  color: var(--foreground);
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 11px;
+  line-height: 1.6;
+  width: max-content;
+  max-width: 220px;
+  text-align: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  z-index: 100;
+  pointer-events: none;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+  white-space: normal;
+}
+.type-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: rgba(212,175,55,0.3) transparent transparent transparent;
+}
+.type-wrapper:hover .type-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0) scale(1);
+}
+.type-wrapper {
+  position: relative;
+}
+@media (max-width: 768px) {
+  .type-tooltip {
+    display: none; /* Tooltips on hover don't work cleanly on touch devices */
+  }
+}
+
+
+@keyframes gold-flash {
+  0% { box-shadow: 0 0 0px var(--gold); border-color: var(--gold); }
+  50% { box-shadow: 0 0 20px var(--gold); border-color: var(--gold); background: rgba(212,175,55,0.1); }
+  100% { box-shadow: 0 0 0px var(--gold); border-color: var(--border); }
+}
+.liquid-ripple {
+  position: absolute;
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  animation: ripple-anim 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+  z-index: 0;
+  width: 200px;
+  height: 200px;
+}
+@keyframes ripple-anim {
+  to { transform: translate(-50%, -50%) scale(4); opacity: 0; }
+}
+
+
+@keyframes ghost-pulse {
+  0% { opacity: 0.8; }
+  100% { opacity: 1; }
+}
+
+</style>
+
+<style>
+/* Prevent double tap to zoom on all interactive elements */
+a, button, input, select, textarea, .type-card, .equip-card, .region-card, .stepper-btn, .seg-btn {
+  touch-action: manipulation;
+}
+</style>
+
+  <!-- GSAP & Lenis Engine -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
+
+</head>
+<body>
+  <div id="page-transition-overlay"></div>
+<div class="app">
+<div class="progress-bar-container" style="position:fixed;top:0;left:0;right:0;height:3px;background:var(--border);z-index:9999;">
+  <div id="topProgressBar" style="height:100%;width:16.66%;background:var(--primary);transition:width 0.4s ease;"></div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="logo-wrap" onclick="handleLogoClick()" style="cursor:pointer;user-select:none;" title="Faii House">
+      <div class="logo-icon">
+        <img src="logo-white.png" alt="Faii House">
+      </div>
+      <div class="logo-text">
+        <div class="sub" style="font-family:system-ui,sans-serif;">FAII&nbsp;HOUSE · PRODUCTION</div>
+      </div>
+    </div>
+    <div class="owner-mode-indicator" id="ownerBadge">
+      <span class="owner-mode-dot"></span>
+      <span class="ar-only">وضع الشركة</span>
+      <span class="en-only">Owner Mode</span>
+      <button class="owner-exit-btn" onclick="exitOwnerMode()">
+        <span class="ar-only">خروج</span>
+        <span class="en-only">Exit</span>
+      </button>
+    </div>
+    <div class="header-right">
+      <a class="btn-sm btn-ghost" href="/" style="text-decoration:none;" aria-label="Faii House Home">
+        <span class="ar-only">← الرئيسية</span>
+        <span class="en-only">← Home</span>
+      </a>
+      <button class="tour-help" onclick="startTour(true)" id="btnTourHelp" type="button">
+        <span class="ar-only">؟ كيف تعمل</span>
+        <span class="en-only">? How it works</span>
+      </button>
+      <button class="lang-btn" onclick="toggleLang()" id="langToggle">EN</button>
+      <button class="btn-sm btn-ghost" onclick="resetAll()" id="btnReset">إعادة تعيين</button>
+      <button class="btn-sm btn-gold" onclick="showPreview()" id="btnGenerate">إنشاء العرض ✦</button>
+    </div>
+
+  </header>
+
+  <!-- STEPS -->
+  <div class="step-nav">
+    <div class="step-tab active" id="tab-1" onclick="goStep(1)">
+      <div class="step-num">1</div><span class="ar-only">نوع المشروع</span><span class="en-only">Project Type</span>
+    </div>
+    <div class="step-tab" id="tab-2" onclick="goStep(2)">
+      <div class="step-num">2</div><span class="ar-only">معلومات العميل</span><span class="en-only">Client Info</span>
+    </div>
+    <div class="step-tab" id="tab-3" onclick="goStep(3)">
+      <div class="step-num">3</div><span class="ar-only">الطاقم والأيام</span><span class="en-only">Crew & Days</span>
+    </div>
+    <div class="step-tab" id="tab-4" onclick="goStep(4)">
+      <div class="step-num">4</div><span class="ar-only">المعدات</span><span class="en-only">Equipment</span>
+    </div>
+    <div class="step-tab" id="tab-5" onclick="goStep(5)">
+      <div class="step-num">5</div><span class="ar-only">ما بعد الإنتاج</span><span class="en-only">Post-Production</span>
+    </div>
+    <div class="step-tab" id="tab-6" onclick="goStep(6)">
+      <div class="step-num">6</div><span class="ar-only">الموقع</span><span class="en-only">Location</span>
+    </div>
+  </div>
+
+  <!-- STEP 1: PROJECT TYPE -->
+  <div class="section active" id="sec-1">
+    <div class="section-head">
+      <h1 class="ar-only">منشئ عروض أسعار Faii House</h1>
+      <h1 class="en-only">Faii House Quote Builder</h1>
+      <h2 class="ar-only">ما نوع مشروعك؟</h2>
+      <h2 class="en-only">What type of project?</h2>
+      <p class="ar-only">اختر فئة المشروع لتحميل الطاقم والأسعار المقترحة<span class="hint" tabindex="0" data-hint="يمكنك تعديل الطاقم والأيام والمعدات في الخطوات التالية — هذا مجرد نقطة بداية.">؟</span></p>
+      <p class="en-only">Select the project category to load suggested crew and rates</p>
+    </div>
+    <div class="type-grid" id="typeGrid"></div>
+
+    <!-- REEL PACK UI -->
+    <div id="reelWrap" style="display:none">
+      <div class="reel-pack-box show" id="reelPackBox">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+          <div>
+            <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin-bottom:4px;" class="ar-only">عدد الريلز</div>
+            <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin-bottom:4px;" class="en-only">Number of Reels</div>
+            <div class="days-input">
+              <button onclick="changeReels(-1)">−</button>
+              <span id="reelCount" style="font-size:28px;">1</span>
+              <button onclick="changeReels(1)">+</button>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:4px;" class="ar-only">سعر كل ريل (يُحسب تلقائياً)</div>
+            <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:4px;" class="en-only">Rate per Reel (auto-calculated)</div>
+            <input type="number" id="reelRate" value="150" min="50" step="10" style="width:110px;font-size:18px;font-weight:700;color:var(--gold);font-family:'Playfair Display',serif;opacity:0.7;" readonly>
+          </div>
+        </div>
+        <div class="reel-breakdown" id="reelBreakdown">
+          <!-- filled by JS -->
+        </div>
+        <div class="pack-notice" id="packNotice">
+          <span>🎉</span>
+          <span id="packText"></span>
+        </div>
+        <div style="margin-top:10px;background:rgba(244,153,33,0.06);border:1px solid var(--gold-b);padding:8px 14px;font-size:11px;color:var(--text3);">
+          <span class="ar-only">⚠️ يُشترط تصوير جميع الريلز في يوم واحد وجلسة واحدة للحصول على سعر الباقة</span>
+          <span class="en-only">⚠️ All reels must be filmed in one day / one session to qualify for pack pricing</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="step-nav-btns" style="justify-content:flex-end;">
+      <button class="btn-sm btn-gold" onclick="goStep(2)"><span class="ar-only">التالي: معلومات العميل ←</span><span class="en-only">Next: Client Info →</span></button>
+    </div>
+  </div>
+
+  <!-- STEP 2: CLIENT INFO -->
+  <div class="section" id="sec-2">
+    <div class="section-head">
+      <h2 class="ar-only">معلومات العميل</h2>
+      <h2 class="en-only">Client Information</h2>
+      <p class="ar-only">ستظهر هذه المعلومات في وثيقة عرض السعر</p>
+      <p class="en-only">This will appear on the price offer document</p>
+    </div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="ar-only">اسم العميل</label>
+        <label class="en-only">Client Name</label>
+        <input type="text" id="clientName" placeholder="فادي حداد / Fadi Haddad" oninput="updateQuote()">
+      </div>
+      <div class="form-group">
+        <label class="ar-only">الشركة / البراند</label>
+        <label class="en-only">Company / Brand</label>
+        <input type="text" id="clientCompany" placeholder="Pizza Shop" oninput="updateQuote()">
+      </div>
+      <div class="form-group">
+        <label class="ar-only">عنوان المشروع</label>
+        <label class="en-only">Project Title</label>
+        <input type="text" id="projectTitle" placeholder="Brand Commercial Video" oninput="updateQuote()">
+      </div>
+      <div class="form-group">
+        <label class="ar-only">تاريخ العرض</label>
+        <label class="en-only">Quote Date</label>
+        <input type="date" id="quoteDate" oninput="updateQuote()">
+      </div>
+      <div class="form-group">
+        <label class="ar-only">أعده</label>
+        <label class="en-only">Prepared By</label>
+        <input type="text" id="preparedBy" value="Ahmad Haddad" oninput="updateQuote()">
+      </div>
+      <div class="form-group">
+        <label class="ar-only">موعد التسليم</label>
+        <label class="en-only">Delivery Timeline</label>
+        <div class="seg-ctrl" id="deliveryDaysWrapper">
+           <button type="button" class="seg-btn active" data-val="14" onclick="setDelivery('14')">14 يوم / 14d</button>
+           <button type="button" class="seg-btn" data-val="7" onclick="setDelivery('7')">7 أيام / 7d</button>
+           <button type="button" class="seg-btn" data-val="rush" onclick="setDelivery('rush')">سريع / Rush</button>
+        </div>
+        <input type="hidden" id="deliveryDays" value="14">
+      </div>
+      <script>
+        function setDelivery(val) {
+  if(navigator.vibrate) navigator.vibrate(30);
+  playTick();
+          document.querySelectorAll('#deliveryDaysWrapper .seg-btn').forEach(b => {
+            b.classList.remove('active');
+            if(b.getAttribute('data-val') === val) b.classList.add('active');
+          });
+          document.getElementById('deliveryDays').value = val;
+          updateQuote();
+        }
+      </script>
+      <div class="form-group full">
+        <label class="ar-only">ملاحظات إضافية (اختياري)</label>
+        <label class="en-only">Project Notes (optional)</label>
+        <textarea id="projectNotes" placeholder="أي متطلبات خاصة، تفاصيل الموقع، الممثلون، إلخ..." oninput="updateQuote()"></textarea>
+      </div>
+    </div>
+    <div class="step-nav-btns">
+      <button class="btn-sm btn-ghost" onclick="goStep(1)"><span class="ar-only">→ رجوع</span><span class="en-only">← Back</span></button>
+      <button class="btn-sm btn-gold" onclick="goStep(3)"><span class="ar-only">التالي: الطاقم والأيام ←</span><span class="en-only">Next: Crew & Days →</span></button>
+    </div>
+  </div>
+
+  <!-- STEP 3: CREW & DAYS -->
+  <div class="section" id="sec-3">
+    <div class="section-head">
+      <h2 class="ar-only">الطاقم وأيام التصوير</h2>
+      <h2 class="en-only">Crew & Shooting Days</h2>
+      <p class="ar-only">حدد أعضاء الطاقم وعدد أيام التصوير</p>
+      <p class="en-only">Select crew members, set rates and shooting days</p>
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:18px;">
+      <div class="days-selector">
+        <label class="ar-only">أيام التصوير:</label>
+        <label class="en-only">Shooting Days:</label>
+        <div class="days-input">
+          <button onclick="changeDays(-1, event)">−</button>
+          <span id="daysDisplay">1</span>
+          <button onclick="changeDays(1, event)">+</button>
+        </div>
+        <span id="daysHint" class="days-hint"></span>
+      </div>
+    </div>
+
+    <div id="discountBar" class="discount-bar">
+      <span class="d-icon">🎯</span>
+      <span class="d-text ar-only">تم تطبيق خصم تلقائي</span>
+      <span class="d-text en-only">Automatic discount applied</span>
+      <span class="d-val" id="discountPct"></span>
+    </div>
+
+
+    <div style="width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; margin-bottom:14px; padding-bottom:4px; padding-top: 150px; margin-top: -150px;">
+      <table class="crew-table" id="crewTable" style="margin-bottom:0;">
+          <colgroup>
+    <col style="width:40px">
+    <col style="width:35%">
+    <col style="width:20%">
+    <col style="width:20%">
+    <col style="width:15%">
+  </colgroup>
+       <thead>
+    <tr>
+      <th style="width:44px;text-align:center"></th>
+      <th><span class="ar-only">الدور</span><span class="en-only">Role</span></th>
+      <th style="width:130px"><span class="ar-only">السعر/يوم (JD)</span><span class="en-only">Rate/Day (JD)</span></th>
+      <th style="width:110px"><span class="ar-only">الكمية</span><span class="en-only">Qty</span></th>
+      <th style="width:100px"><span class="ar-only">المجموع</span><span class="en-only">Total</span></th>
+    </tr>
+  </thead>
+        <tbody id="crewBody"></tbody>
+      </table>
+    </div>
+    <div class="add-role-btn-wrap">
+      <button class="add-role-btn" onclick="addCustomRole()">+ <span class="ar-only">إضافة دور مخصص</span><span class="en-only">Add Custom Role</span></button>
+    </div>
+
+    <div class="step-nav-btns">
+      <button class="btn-sm btn-ghost" onclick="goStep(2)"><span class="ar-only">→ رجوع</span><span class="en-only">← Back</span></button>
+      <button class="btn-sm btn-gold" onclick="goStep(4)"><span class="ar-only">التالي: المعدات ←</span><span class="en-only">Next: Equipment →</span></button>
+    </div>
+  </div>
+
+  <!-- STEP 4: EQUIPMENT -->
+  <div class="section" id="sec-4">
+    <div class="section-head">
+      <h2 class="ar-only">المعدات</h2>
+      <h2 class="en-only">Equipment</h2>
+      <p class="ar-only">اختر باقة جاهزة أو حدد عناصر فردية من معداتي</p>
+      <p class="en-only">Select a ready package or pick individual items from my inventory</p>
+    </div>
+
+    <div class="equip-grid" id="equipGrid"></div>
+    <div id="warn-equip-pro" style="background: rgba(231, 76, 60, 0.08); border: 1px solid rgba(231, 76, 60, 0.2); color: #e74c3c; padding: 12px 16px; border-radius: 8px; font-size: 12px; margin-top: 16px; display: none; line-height: 1.5; font-weight: 500;">
+      ⚠️ <span class="ar-only">تنبيه: باقات السينما الاحترافية تتطلب "مصور سينمائي" خبير لتشغيلها وإعدادها.</span>
+      <span class="en-only">Warning: Cinema packages require an experienced Cinematographer to operate.</span>
+    </div>
+      <div style="margin-top:12px;">
+        <div class="form-group">
+          <label class="ar-only">تكلفة معدات مخصصة (JD/يوم) — تجاوز الباقة</label>
+          <label class="en-only">Custom Equipment Cost (JD/day) — override tier</label>
+          <input type="number" id="customEquip" placeholder="0" min="0" oninput="updateQuote()" style="max-width:200px;">
+        </div>
+      </div>
+
+    <div class="step-nav-btns">
+      <button class="btn-sm btn-ghost" onclick="goStep(3)"><span class="ar-only">→ رجوع</span><span class="en-only">← Back</span></button>
+      <button class="btn-sm btn-gold" onclick="goStep(5)"><span class="ar-only">التالي: ما بعد الإنتاج ←</span><span class="en-only">Next: Post-Production →</span></button>
+    </div>
+  </div>
+
+  <!-- STEP 5: POST-PRODUCTION -->
+  <div class="section" id="sec-5">
+    <div class="section-head">
+      <h2 class="ar-only">ما بعد الإنتاج</h2>
+      <h2 class="en-only">Post-Production</h2>
+      <p class="ar-only">اختر خدمات المونتاج وتصحيح الألوان (الخدمات المغطاة بالطاقم لن تظهر)</p>
+      <p class="en-only">Select editing and finishing services (services covered by crew are hidden)</p>
+    </div>
+    <div class="post-options" id="postOptions"></div>
+    <div id="rushNote" style="display:none;background:rgba(231,76,60,0.07);border:1px solid rgba(231,76,60,0.25);padding:11px 14px;font-size:12px;color:#e74c3c;margin-top:8px;">
+      ⚡ <span class="ar-only">التسليم السريع — سيضاف 50% على تكاليف المونتاج</span>
+      <span class="en-only">Rush delivery — +50% will be added to editing/post costs</span>
+    </div>
+    <div class="step-nav-btns">
+      <button class="btn-sm btn-ghost" onclick="goStep(4)"><span class="ar-only">→ رجوع</span><span class="en-only">← Back</span></button>
+      <button class="btn-sm btn-gold" onclick="goStep(6)"><span class="ar-only">التالي: الموقع ←</span><span class="en-only">Next: Location →</span></button>
+    </div>
+  </div>
+
+  <!-- STEP 6: LOCATION -->
+  <div class="section" id="sec-6">
+    <div class="section-head">
+      <h2 class="ar-only">موقع التصوير</h2>
+      <h2 class="en-only">Shooting Location</h2>
+      <p class="ar-only">ستضاف رسوم السفر بناءً على المنطقة</p>
+      <p class="en-only">Travel fees will be added based on region</p>
+    </div>
+    <div class="region-grid" id="regionGrid"></div>
+    <div id="customTravelWrap" style="display:none;margin-top:14px;">
+      <div class="form-group" style="max-width:250px;">
+        <label class="ar-only">رسوم السفر المخصصة (JD)</label>
+        <label class="en-only">Custom Travel Fee (JD)</label>
+        <input type="number" id="customTravel" placeholder="0" min="0" oninput="updateQuote()">
+      </div>
+    </div>
+    <div class="step-nav-btns">
+      <button class="btn-sm btn-ghost" onclick="goStep(5)"><span class="ar-only">→ رجوع</span><span class="en-only">← Back</span></button>
+      <button class="btn-sm btn-gold" onclick="showPreview()"><span class="ar-only">إنشاء عرض السعر ✦</span><span class="en-only">Generate Price Offer ✦</span></button>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- SIDEBAR: LIVE QUOTE -->
+<div class="sidebar">
+  
+  <div class="owner-settings" style="display:none; padding:15px; background:var(--surface-elevated); border-bottom:1px solid var(--border);">
+    <div style="font-size:11px;font-weight:700;color:var(--gold);margin-bottom:10px;letter-spacing:1px;">OWNER SETTINGS</div>
+    <div class="form-group" style="margin-bottom:10px;">
+      <label style="font-size:10px;">Currency</label>
+      <select id="ownerCurrency" onchange="state.currency = this.value; saveState(); location.reload();" class="select-css" style="padding:6px; font-size:12px; height:auto;">
+        <option value="JOD">JOD - Jordanian Dinar</option>
+        <option value="USD">USD - US Dollar</option>
+        <option value="SAR">SAR - Saudi Riyal</option>
+        <option value="AED">AED - UAE Dirham</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label style="font-size:10px;">Payment Terms</label>
+      <select id="ownerPayment" onchange="state.paymentTerms = this.value; saveState();" class="select-css" style="padding:6px; font-size:12px; height:auto;">
+        <option value="50_50">50% on signature · 50% on delivery</option>
+        <option value="30_40_30">30% sig. / 40% prod. / 30% deliv.</option>
+        <option value="net_30">Net 30 on delivery</option>
+      </select>
+    </div>
+    <div class="form-group" style="margin-top:10px;">
+      <label style="font-size:10px;">Discount Override</label>
+      <div style="display:flex; gap:5px;">
+        <select id="ownerDiscountMode" onchange="state.discountMode = this.value; document.getElementById('ownerDiscountVal').style.display = (this.value==='custom_pct'||this.value==='custom_amt') ? 'block' : 'none'; saveState(); updateQuote();" class="select-css" style="padding:6px; font-size:12px; height:auto; flex:1;">
+          <option value="auto">Auto (Volume)</option>
+          <option value="none">None (0)</option>
+          <option value="custom_pct">Custom %</option>
+          <option value="custom_amt">Custom Amount</option>
+        </select>
+        <input type="number" id="ownerDiscountVal" placeholder="Val" onchange="state.discountVal = Number(this.value); saveState(); updateQuote();" onkeyup="if(event.key==='Enter')this.blur()" style="display:none; width:60px; font-size:12px; padding:6px; background:var(--surface-elevated); border:1px solid var(--border); color:var(--text); border-radius:4px; text-align:center;">
+      </div>
+    </div>
+  </div>
+
+  <div class="sb-header">
+    <div class="sb-title ar-only">العرض المباشر</div>
+    <div class="sb-title en-only">Live Quote</div>
+    <div class="sb-subtitle ar-only">يتحدّث في الوقت الحقيقي<span class="hint" tabindex="0" data-hint="كل اختيار تقوم به يظهر هنا فورًا مع سعره — لا حاجة للحفظ.">؟</span></div>
+    <div class="sb-subtitle en-only">Updates in real-time<span class="hint" tabindex="0" data-hint="Every choice you make appears here instantly with its price — no need to save.">?</span></div>
+  </div>
+  <div class="sb-body" id="sbBody">
+    <div class="sb-empty">
+      <span class="sb-empty-icon">🎬</span>
+      <p class="ar-only">اختر نوع المشروع لبدء بناء عرض السعر</p>
+      <p class="en-only">Select a project type to start building your quote</p>
+    </div>
+  </div>
+  <div class="sb-cta">
+    <button class="btn-full btn-generate" onclick="showPreview()">
+      <span class="ar-only">إنشاء عرض السعر</span>
+      <span class="en-only">Generate Price Offer</span>
+    </button>
+    <button class="btn-full btn-wa" onclick="sendWhatsApp()">💬 <span class="ar-only">إرسال عبر واتساب</span><span class="en-only">Send via WhatsApp</span></button>
+    <button class="btn-full btn-negotiate" onclick="openNegotiate()"><span class="neg-ico">🤝</span> <span class="ar-only">تفاوض على السعر</span><span class="en-only">Negotiate Price</span></button>
+    <div style="margin-top:8px;font-size:10.5px;color:var(--text3);line-height:1.7;text-align:center;">
+      <span class="ar-only">كل عروضنا قابلة للتفاوض — أخبرنا بميزانيتك.</span>
+      <span class="en-only">All our offers are negotiable — tell us your budget.</span>
+    </div>
+  </div>
+</div>
+
+</div><!-- /app -->
+
+<!-- MOBILE BAR -->
+<div class="mobile-quote-bar">
+  <div class="mq-total">
+    <span class="mq-label ar-only">إجمالي العرض</span>
+    <span class="mq-label en-only">Total Quote</span>
+        <span class="mq-amount" id="mobileTotal">0 ${state.currency||"JOD"}</span>
+    <div id="mobileSavings" style="font-size:11px; color:var(--gold); font-weight:bold; opacity:0; transition:0.3s; margin-top:2px;"></div>
+  </div>
+  <button class="mq-btn" onclick="showPreview()">
+    <span class="ar-only">إنشاء العرض</span>
+    <span class="en-only">Generate Offer</span>
+  </button>
+</div>
+
+<!-- QUOTE MODAL -->
+<div class="modal-overlay" id="quoteModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 class="ar-only">معاينة عرض السعر</h3>
+      <h3 class="en-only">Price Offer Preview</h3>
+      <div class="modal-actions">
+        <button class="btn-sm btn-gold" onclick="window.print()">🖨 Print / PDF</button>
+        <button class="modal-close" onclick="closeModal()">×</button>
+      </div>
+    </div>
+    <div id="quotePreview"></div>
+  </div>
+</div>
+
+<script>
+// STATE
+// ══════════════════════════════════════════════════════════════
+const LS_KEY = 'faii_house_state';
+const LS_LANG = 'faii_house_lang';
+
+const DEFAULT_STATE = () => ({
+  step:1,
+  projectType:null,
+  reelCount:1,
+  reelRate:150,
+  days:1,
+  crew:{},
+  equipMode:'tier',
+  equipment:null,
+  equipItems:{},
+  post:{},
+  region:null,
+  customTravel:0,
+  customEquip:0,
+  clientName:'', clientCompany:'', projectTitle:'',
+  quoteDate:new Date().toISOString().split('T')[0],
+  preparedBy:'Ahmad Haddad',
+  deliveryDays:'14',
+  projectNotes:'',
+  currency:'JOD',
+  paymentTerms:'50_50',
+});
+
+function saveState() {
+  try { localStorage.setItem(LS_KEY, JSON.stringify({state, lang:currentLang})); } catch(e){}
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if(!raw) return false;
+    const saved = JSON.parse(raw);
+    if(saved.state) { state = Object.assign(DEFAULT_STATE(), saved.state); }
+    if(saved.lang) { currentLang = saved.lang; }
+    // Hide reels temporarily: reset if it was the last selected type
+    if(state.projectType === 'reels') state.projectType = null;
+    return true;
+  } catch(e){ return false; }
+}
+
+let currentLang = 'ar';
+let state = DEFAULT_STATE();
+loadState();
+
+
+// ══════════════════════════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════════════════════════
+const PROJECT_TYPES = [
+  {id:'reels',   icon:'📱',name:'Instagram Reels',   ar:'ريلز انستغرام',    range:`100–250 ${state.currency||"JOD"}`, crew:['cinematographer'],  pack:true,  reelBased:true, defaultEquip:'basic', defaultPost:['editing'],
+   desc:'Short, trendy videos designed for viral reach on social media.', descAr:'فيديوهات قصيرة وعصرية مصممة خصيصاً للانتشار السريع على المنصات.'},
+  {id:'interview',icon:'🎙',name:'Interview / Podcast',ar:'مقابلة / بودكاست',range:`300–800 ${state.currency||"JOD"}`,   crew:['cinematographer','sound'], defaultEquip:'standard', defaultPost:['editing','graphics'],
+   desc:'High-quality filmed dialogues to highlight personalities and stories.', descAr:'جلسات حوارية مصورة بجودة عالية لتسليط الضوء على الشخصيات والقصص.'},
+  {id:'corporate',icon:'🏢',name:'Corporate Video',   ar:'فيديو مؤسسي',      range:`600–2,000 ${state.currency||"JOD"}`, crew:['director','cinematographer','producer'], defaultEquip:'standard', defaultPost:['editing','colorgrade','graphics'],
+   desc:'Professional video reflecting your company\'s identity and achievements.', descAr:'فيديو احترافي يعكس هوية شركتك، رؤيتها، وإنجازاتها أمام عملائك.'},
+  {id:'commercial',icon:'📺',name:'Commercial / TVC', ar:'إعلان تجاري',      range:`800–4,000 ${state.currency||"JOD"}`, crew:['director','cinematographer','producer','gaffer','art_director'], defaultEquip:'pro', defaultPost:['editing','colorgrade','sound_design','motion'],
+   desc:'High-end creative ad for TV and campaigns to boost sales.', descAr:'إعلان إبداعي عالي الجودة مخصص للحملات الإعلانية لزيادة المبيعات.'},
+  {id:'documentary',icon:'🎥',name:'Documentary',     ar:'فيلم وثائقي',       range:`600–3,000 ${state.currency||"JOD"}`, crew:['director','cinematographer','sound','location_scout'], defaultEquip:'standard', defaultPost:['editing','colorgrade','subtitles'],
+   desc:'Deep, cinematic storytelling to immortalize events or figures.', descAr:'سرد قصصي عميق وموثق بأسلوب سينمائي لتخليد الأحداث أو الشخصيات.'},
+  {id:'shortfilm',icon:'🎞',name:'Short Film',        ar:'فيلم قصير',          range:`800–3,800 ${state.currency||"JOD"}`, crew:['director','cinematographer','producer','sound','main_actor'], defaultEquip:'pro', defaultPost:['editing','colorgrade','sound_design'],
+   desc:'Full cinematic drama production telling a scripted story.', descAr:'إنتاج سينمائي درامي متكامل يروي قصة مكتوبة بطاقم وممثلين.'},
+  {id:'event',   icon:'🎤',name:'Event Coverage',     ar:'تغطية فعالية',       range:`300–1,500 ${state.currency||"JOD"}`, crew:['cinematographer','photographer'], defaultEquip:'standard', defaultPost:['editing'],
+   desc:'Comprehensive documentation of events and conferences.', descAr:'توثيق شامل وحيوي لفعالياتك ومؤتمراتك لأرشفة اللحظات المهمة.'},
+  {id:'photovideo',icon:'📷',name:'Photo + Video',    ar:'صور + فيديو',        range:`500–2,500 ${state.currency||"JOD"}`, crew:['cinematographer','photographer','art_director'], defaultEquip:'standard', defaultPost:['editing','colorgrade'],
+   desc:'Combined package for both photography and videography needs.', descAr:'حزمة متكاملة تغطي احتياجك من الصور الفوتوغرافية والفيديو في آن واحد.'},
+  {id:'realestate', icon:'🏢', name:'Real Estate Tour', ar:'تصوير عقاري ومعماري', range:`400–1,500 ${state.currency||"JOD"}`, crew:['cinematographer','photographer'], defaultEquip:'standard', defaultPost:['editing','colorgrade'],
+   desc:'Visually appealing tours highlighting architecture and spaces.', descAr:'جولات بصرية جذابة تبرز جماليات العقار والمساحات المعمارية للبيع.'}
+];
+
+const ROLES = [
+  {id:'director',       name:'Director',                ar:'مخرج',                rate:200, hint:'Vision of the project. Directs performance to ensure the best outcome.', hintAr:'يضمن خروج الفيديو كقصة احترافية ويدير أداء الممثلين.'},
+  {id:'cinematographer',name:'Cinematographer / DOP',   ar:'مصور سينمائي',        rate:200, hint:'The visual creator. Responsible for camera movement, angles, and the cinematic touch.', hintAr:'يتحكم بالكاميرا ليضمن خروج الصورة بأجمل شكل سينمائي جذاب.'},
+  {id:'producer',       name:'Producer',                ar:'منتج',                rate:150, hint:'The Maestro. Manages budget, schedule, and logistics to ensure smooth execution.', hintAr:'المدير اللوجستي الذي يحل المشاكل في الموقع لتجلس أنت وترتاح.'},
+  {id:'cam_assistant',  name:'Camera Assistant / AC',   ar:'مساعد كاميرا',        rate:100, hint:'Essential for shooting speed. Pulls focus and preps lenses.', hintAr:'يضمن وضوح الصورة (الفوكس) لتجنب إعادة اللقطات وتضييع وقتك.'},
+  {id:'gaffer',         name:'Gaffer',                  ar:'مضيء',                rate:150, hint:'Master of shadows and light. Adds depth and mood to avoid flat images.', hintAr:'الإضاءة هي سر السينما؛ هو من يمنع صورتك من أن تبدو باهتة.'},
+  {id:'sound',          name:'Sound / Boom Operator',   ar:'مشغل صوت',            rate:100, hint:'50% of video quality is sound. Ensures crisp dialogue and noise isolation.', hintAr:'لأن 50% من جودة الفيديو هي الصوت. يضمن نقاء الحوار وعزل الضوضاء.'},
+  {id:'photographer',   name:'Photographer',            ar:'مصور فوتوغرافي',      rate:200, hint:'Captures high-res moments for campaigns and social media.', hintAr:'توثيق عالي الدقة جاهز للاستخدام المباشر في السوشيال ميديا.'},
+  {id:'driver',         name:'Driver / Transportation', ar:'سائق',               rate:50,  hint:'Safe and fast transport for crew and equipment between locations.', hintAr:'نقل آمن وسريع للطاقم والمعدات بين مواقع التصوير لتوفير الوقت والجهد.'},
+  {id:'art_director',   name:'Art Director',            ar:'مدير فني',            rate:150, hint:'Aesthetics engineer. Responsible for set design, colors, and props.', hintAr:'مهندس الجماليات. مسؤول عن الديكور، الألوان، الأزياء، وشكل المكان أمام الكاميرا.'},
+  {id:'voiceover_talent',name:'Voice Over Artist',      ar:'مؤدي صوتي',          rate:75, flatRate:true,  hint:'Professional voice telling your brand\'s story with an impactful tone.', hintAr:'صوت احترافي يروي قصة علامتك التجارية ويوصل رسالتك بنبرة مؤثرة.'},
+  {id:'preprod',        name:'Pre-Production',          ar:'ما قبل الإنتاج',      rate:100, flatRate:true, hint:'Planning phase: scripting, storyboarding, and scheduling to avoid surprises.', hintAr:'مرحلة التخطيط المسبق، تشمل كتابة السيناريو، الستوري بورد، وجدولة التصوير لتجنب المفاجآت.'},
+  {id:'location_scout', name:'Location Scouting',       ar:'اختيار موقع',        rate:150, flatRate:true, hint:'Finding the best locations for the story and securing permits.', hintAr:'البحث عن أفضل الأماكن التي تناسب قصة الفيديو واستخراج التصاريح اللازمة.'},
+  {id:'casting',        name:'Casting',                 ar:'اختيار ممثلين',      rate:200, flatRate:true, hint:'Auditioning and selecting the best faces to represent your brand.', hintAr:'البحث واختبار الأداء لاختيار أفضل الوجوه التي تمثل علامتك التجارية.'},
+  {id:'main_actor',     name:'Main Actor',              ar:'ممثل رئيسي',         rate:150, hint:'Professional talent to deliver dialogue and lead the story.', hintAr:'ممثل محترف لأداء الحوارات وقيادة قصة الإعلان وجذب انتباه المشاهد.'},
+  {id:'extra_actor',    name:'Extras / Background',     ar:'مؤدي ثانوي (كومبارس)',rate:50,  hint:'Background talent to fill the scene and add natural life.', hintAr:'أشخاص لملء خلفية المشهد وإضافة حيوية وواقعية لبيئة التصوير.'},
+];
+
+const EQUIPMENT_TIERS = [
+  {id:'none', tier:'None', tierAr:'بدون', name:'No Equipment', nameAr:'مقدمة من العميل', items:'Client provided', itemsAr:'مقدمة من طرف العميل', price:0, badge:'', badgeAr:''},
+  {id:'basic',   tier:'Basic',    tierAr:'أساسي',    name:'Standard Setup',    nameAr:'إعداد قياسي',     items:'Sony FX3/A7SIII', itemsAr:'كاميرا Sony وعدسات وإضاءة بسيطة', price:100, badge:'Ideal for Social Media 📱', badgeAr:'مثالي للسوشيال ميديا 📱'},
+  {id:'standard',tier:'Standard', tierAr:'قياسي',    name:'Full Camera Kit',   nameAr:'طقم كاميرا كامل', items:'Multiple Lenses + Lighting', itemsAr:'معدات إضاءة متكاملة وصوت نقي', price:200, badge:'Corporate & Interviews 🏢', badgeAr:'للشركات والمقابلات 🏢'},
+  {id:'pro',     tier:'Pro',      tierAr:'احترافي',  name:'Cinema Package',    nameAr:'باقة سينمائية',   items:'Cinema Camera + Drone', itemsAr:'معدات ضخمة وحركة كاميرا احترافية', price:350, badge:'TV Quality 📺', badgeAr:'جودة إعلانات التلفزيون 📺'},
+  {id:'red',     tier:'Premium',  tierAr:'بريميوم',  name:'RED / ALEXA Kit',   nameAr:'طقم RED / ALEXA', items:'RED Camera + Studio Gear', itemsAr:'أعلى كاميرات السينما العالمية (رد / ألكسا)', price:550, badge:'Netflix Standard 🍿', badgeAr:'جودة سينما عالمية 🍿'}
+];
+
+// Individual Equipment Items from Ahmad's Inventory
+const EQUIPMENT_ITEMS = [
+  // Cameras
+  {id:'bmpcc6k',    cat:'cameras',  catAr:'كاميرات',       catIcon:'📷', name:'Blackmagic Pocket 6K Pro',         ar:'بلاك ماجيك 6K برو',         rate:70},
+  {id:'sony_fx3',   cat:'cameras',  catAr:'كاميرات',       catIcon:'📷', name:'Sony FX3 Cinema Camera',           ar:'سوني FX3 سينمائية',          rate:60},
+  {id:'sony_a7siii',cat:'cameras',  catAr:'كاميرات',       catIcon:'📷', name:'Sony A7S III',                     ar:'سوني A7S III',               rate:50},
+  // Lenses
+  {id:'sigma_24',   cat:'lenses',   catAr:'عدسات',         catIcon:'🔭', name:'Sigma 24mm f/1.4 Art DG DN',       ar:'سيغما 24mm f/1.4 آرت',       rate:20},
+  {id:'sigma_35',   cat:'lenses',   catAr:'عدسات',         catIcon:'🔭', name:'Sigma 35mm f/1.4 Art DG DN',       ar:'سيغما 35mm f/1.4 آرت',       rate:20},
+  {id:'sigma_85',   cat:'lenses',   catAr:'عدسات',         catIcon:'🔭', name:'Sigma 85mm f/1.4 Art DG DN',       ar:'سيغما 85mm f/1.4 آرت',       rate:20},
+  {id:'sony_2470',  cat:'lenses',   catAr:'عدسات',         catIcon:'🔭', name:'Sony FE 24–70mm GM',               ar:'سوني 24-70mm GM',            rate:25},
+  // Audio
+  {id:'zoom_h6',    cat:'audio',    catAr:'معدات الصوت',   catIcon:'🎤', name:'Zoom H6 Audio Recorder',           ar:'مسجل زوم H6',                rate:15},
+  {id:'rode_wgo2',  cat:'audio',    catAr:'معدات الصوت',   catIcon:'🎤', name:'Rode Wireless GO II (×2)',          ar:'رود وايرلس جو II',           rate:15},
+  {id:'sennheiser', cat:'audio',    catAr:'معدات الصوت',   catIcon:'🎤', name:'Sennheiser EW Wireless System',    ar:'زينهايزر EW لاسلكي',         rate:20},
+  {id:'boom_mic',   cat:'audio',    catAr:'معدات الصوت',   catIcon:'🎤', name:'Boom Mic + Blimp + Stand',         ar:'مايك بوم + حماية + حامل',   rate:10},
+  // Lighting
+  {id:'aputure200d',cat:'lighting', catAr:'إضاءة',         catIcon:'💡', name:'Aputure 200D LED Light',           ar:'أبيتشر 200D LED',            rate:30},
+  {id:'godox_led',  cat:'lighting', catAr:'إضاءة',         catIcon:'💡', name:'Godox SL-60 / LED Panel',          ar:'جودوكس SL-60 / إضاءة LED',  rate:15},
+  {id:'softbox',    cat:'lighting', catAr:'إضاءة',         catIcon:'💡', name:'Godox Softbox + Light Stand',      ar:'سوفت بوكس جودوكس + حامل',   rate:10},
+  {id:'ring_light', cat:'lighting', catAr:'إضاءة',         catIcon:'💡', name:'Ring Light 18"',                   ar:'ضوء حلقي 18 بوصة',           rate:10},
+  // Stabilization
+  {id:'dji_rs3',    cat:'stabilization', catAr:'تثبيت',   catIcon:'🎯', name:'DJI RS3 Pro Gimbal',               ar:'DJI RS3 برو جيمبال',         rate:25},
+  {id:'tripod',     cat:'stabilization', catAr:'تثبيت',   catIcon:'🎯', name:'Fluid Head Tripod',               ar:'تراipود رأس سائل احترافي',   rate:10},
+  {id:'follow_focus',cat:'stabilization',catAr:'تثبيت',   catIcon:'🎯', name:'Follow Focus System',              ar:'فولو فوكس',                  rate:10},
+  // Monitors & Recording
+  {id:'atomos',     cat:'monitors', catAr:'شاشات وتسجيل', catIcon:'🖥', name:'Atomos Ninja 5" Monitor/Recorder', ar:'أتوموس نينجا 5 بوصة',        rate:20},
+  {id:'field_mon',  cat:'monitors', catAr:'شاشات وتسجيل', catIcon:'🖥', name:'5" Field Monitor',                 ar:'شاشة ميدانية 5 بوصة',        rate:10},
+  // Storage & Power
+  {id:'cards',      cat:'storage',  catAr:'تخزين وطاقة',  catIcon:'💾', name:'Memory Cards Set (CFexpress + SD)',ar:'بطاقات ذاكرة CFexpress + SD', rate:5},
+  {id:'ssd',        cat:'storage',  catAr:'تخزين وطاقة',  catIcon:'💾', name:'External SSD 2TB',                 ar:'SSD خارجي 2 تيرابايت',       rate:5},
+  {id:'vmount',     cat:'storage',  catAr:'تخزين وطاقة',  catIcon:'💾', name:'V-Mount Battery Kit (×2 + charger)',ar:'بطاريات V-Mount ×2 + شاحن', rate:10},
+  {id:'lpe6',       cat:'storage',  catAr:'تخزين وطاقة',  catIcon:'💾', name:'LP-E6 Battery Kit (×4 + dual charger)',ar:'بطاريات LP-E6 ×4 + شاحن',rate:5},
+  // Drone
+  {id:'drone',      cat:'drones',   catAr:'طائرات مسيّرة',catIcon:'🚁', name:'DJI Mini 4 Pro / Air 3',           ar:'طائرة مسيّرة DJI',          rate:80},
+  // Accessories
+  {id:'cage',       cat:'accessories',catAr:'إكسسوارات',  catIcon:'🔧', name:'SmallRig Camera Cage + Rig',       ar:'كيج وريج سمول ريج',          rate:10},
+  {id:'nd_filter',  cat:'accessories',catAr:'إكسسوارات',  catIcon:'🔧', name:'Variable ND Filter Set',           ar:'فلترات ND متغيرة',           rate:8},
+  {id:'magic_arm',  cat:'accessories',catAr:'إكسسوارات',  catIcon:'🔧', name:'Magic Arms + Clamps Set',          ar:'ذراع مرن + كلامبات',         rate:5},
+  {id:'hdmi_cables',cat:'accessories',catAr:'إكسسوارات',  catIcon:'🔧', name:'HDMI Cables Set',                  ar:'مجموعة كابلات HDMI',         rate:5},
+  {id:'headphones', cat:'accessories',catAr:'إكسسوارات',  catIcon:'🔧', name:'Studio Headphones',                ar:'سماعات استوديو',             rate:5},
+];
+
+const POST_OPTIONS = [
+  {id:'editing',     name:'Video Editing',             ar:'مونتاج فيديو',                  desc:'Cut, sync, music, color correction',  descAr:'قص وتجميع اللقطات لاختيار الأفضل وبناء القصة.',   basePrice:150, reelPrice:50},
+  {id:'colorgrade',  name:'Color Grading (DaVinci Resolve)',   ar:'تلوين سينمائي (DaVinci Resolve)',        desc:'Full cinematic grade — DaVinci Resolve',descAr:'نقلة نوعية تجعل ألوان الفيديو تبدو كفيلم سينمائي.',   basePrice:150,  reelPrice:50},
+  {id:'voiceover',   name:'Voice Over',                ar:'تعليق صوتي',                    desc:'Arabic/English VO recording',         descAr:'تسجيل صوت احترافي يروي قصة إعلانك بأسلوب مقنع.',   basePrice:100,  fixed:true},
+  {id:'graphics',    name:'Motion Graphics / Titles',  ar:'موشن جرافيك',                   desc:'Animated titles, lower thirds, end cards', descAr:'تحريك النصوص والشعارات لشرح الأفكار بصرياً.', basePrice:80,  fixed:true},
+  {id:'sound_design',name:'Sound Design & Mix',        ar:'تصميم صوتي ومكس',               desc:'Full audio mix, SFX, music licensing', descAr:'مكس صوتي كامل ومؤثرات',          basePrice:150, fixed:true},
+  {id:'screenplay',  name:'Screenplay / Script',       ar:'كتابة سيناريو',                  desc:`External scriptwriter — 50–100 ${state.currency||"JOD"} depending on project`, descAr:`كاتب خارجي متعاون — 50 إلى 100 ${state.currency||"JOD"} حسب المشروع`, basePrice:75, fixed:true, scriptNote:true},
+];
+
+const REGIONS = [
+  {id:'irbid',  icon:'🏠', name:'Irbid (Home)',     ar:'إربد (القاعدة)', cities:'Irbid · Ajloun · Jerash · Mafraq',  citiesAr:'إربد · عجلون · جرش · المفرق',          fee:0},
+  {id:'amman',  icon:'🏙', name:'Amman / Central', ar:'عمّان / الوسط',  cities:'Amman · Zarqa · Balqa · Madaba',     citiesAr:'عمّان · الزرقاء · البلقاء · مادبا',    fee:25},
+  {id:'south',  icon:'🏔', name:'South Jordan',    ar:'جنوب الأردن',   cities:'Karak · Tafila · Ma\'an · Aqaba',   citiesAr:'الكرك · الطفيلة · معان · العقبة',       fee:80},
+  {id:'petra',  icon:'⛩', name:'Petra / Wadi Rum',ar:'البتراء / وادي رم',cities:'Petra · Wadi Rum · Wadi Musa',   citiesAr:'البتراء · وادي رم · وادي موسى',          fee:120},
+  {id:'other',  icon:'✈️', name:'Outside Jordan',  ar:'خارج الأردن',   cities:'International / Special Location',   citiesAr:'دولي / موقع خاص',                       fee:null},
+];
+
+// Equipment categories order
+const EQUIP_CATS = ['cameras','lenses','audio','lighting','stabilization','monitors','storage','drones','accessories'];
+
+// ══════════════════════════════════════════════════════════════
+
+// ══════════════════════════════════════════════════════════════
+// OWNER MODE — hidden feature, triggered by 5× logo clicks
+// ══════════════════════════════════════════════════════════════
+let isOwnerMode = false;
+let logoClickCount = 0;
+let logoClickTimer = null;
+const OWNER_PIN = '0000'; // PIN to confirm owner mode
+const OWNER_LS  = 'faii_owner_mode';
+
+function applyOwnerMode(active) {
+  isOwnerMode = active;
+  if(active) document.body.classList.add('owner-mode');
+  else document.body.classList.remove('owner-mode');
+  
+  const crewSection = document.querySelector('#sec-3');
+  if(crewSection) {
+    if(active) crewSection.classList.add('owner-mode');
+    else crewSection.classList.remove('owner-mode');
+  }
+  const badge = document.getElementById('ownerBadge');
+  if(badge) {
+    if(active) badge.classList.add('show');
+    else badge.classList.remove('show');
+  }
+  try { if(active) localStorage.setItem(OWNER_LS,'1'); else localStorage.removeItem(OWNER_LS); } catch(e){}
+}
+
+function handleLogoClick() {
+  logoClickCount++;
+  clearTimeout(logoClickTimer);
+  logoClickTimer = setTimeout(()=>{ logoClickCount=0; }, 2000);
+  if(logoClickCount >= 5) {
+    logoClickCount = 0;
+    clearTimeout(logoClickTimer);
+    if(isOwnerMode) { exitOwnerMode(); return; }
+    openOwnerPinModal();
+  }
+}
+
+function openOwnerPinModal() {
+  const existing = document.getElementById('ownerPinModal');
+  if(existing) existing.remove();
+  const modal = document.createElement('div');
+  modal.id = 'ownerPinModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:4000;display:flex;align-items:center;justify-content:center;padding:20px;';
+  modal.innerHTML = `
+    <div style="background:var(--dark2);border:1px solid var(--border2);max-width:340px;width:100%;">
+      <div style="background:var(--dark);padding:20px 22px;border-bottom:1px solid var(--border);text-align:center;">
+        <div style="font-size:28px;margin-bottom:8px;">🔐</div>
+        <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--text);">Owner Access</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:4px;letter-spacing:0.5px;">Enter PIN to unlock editing</div>
+      </div>
+      <div style="padding:22px;">
+        <div style="display:flex;gap:8px;justify-content:center;margin-bottom:18px;" id="pinDots">
+          <div style="width:14px;height:14px;border-radius:50%;border:2px solid var(--border2);background:transparent;" id="dot0"></div>
+          <div style="width:14px;height:14px;border-radius:50%;border:2px solid var(--border2);background:transparent;" id="dot1"></div>
+          <div style="width:14px;height:14px;border-radius:50%;border:2px solid var(--border2);background:transparent;" id="dot2"></div>
+          <div style="width:14px;height:14px;border-radius:50%;border:2px solid var(--border2);background:transparent;" id="dot3"></div>
+        </div>
+        <div id="pinError" style="text-align:center;font-size:11px;color:var(--red);min-height:16px;margin-bottom:10px;"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+          ${[1,2,3,4,5,6,7,8,9,'','0','⌫'].map(k=>`
+            <button onclick="pinKey('${k}')"
+              style="padding:14px 0;font-size:${k==='⌫'?'18':'16'}px;font-weight:600;cursor:pointer;
+              background:var(--dark3);border:1px solid var(--border);color:var(--text);
+              transition:var(--t);"
+              onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'"
+              onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text)'"
+              ${k===''?'style="visibility:hidden;background:transparent;border:none;" disabled':''}
+            >${k}</button>`).join('')}
+        </div>
+      </div>
+      <div style="border-top:1px solid var(--border);padding:14px 22px;">
+        <button onclick="document.getElementById('ownerPinModal').remove();pinBuffer='';"
+          style="width:100%;padding:11px;font-size:12px;font-weight:600;cursor:pointer;
+          background:transparent;border:1px solid var(--border2);color:var(--text3);letter-spacing:0.5px;text-transform:uppercase;">
+          Cancel
+        </button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e=>{ if(e.target===modal){ modal.remove(); pinBuffer=''; }});
+  modal.addEventListener('keydown', e=>{ if(e.key==='Escape'){ modal.remove(); pinBuffer=''; }});
+}
+
+let pinBuffer = '';
+function pinKey(k) {
+  if(k==='') return;
+  if(k==='⌫') {
+    pinBuffer = pinBuffer.slice(0,-1);
+  } else if(pinBuffer.length < 4) {
+    pinBuffer += k;
+  }
+  // Update dots
+  for(let i=0;i<4;i++){
+    const dot = document.getElementById('dot'+i);
+    if(dot) dot.style.background = i < pinBuffer.length ? 'var(--gold)' : 'transparent';
+  }
+  if(pinBuffer.length === 4) {
+    if(pinBuffer === OWNER_PIN) {
+      document.getElementById('ownerPinModal')?.remove();
+      pinBuffer = '';
+      applyOwnerMode(true);
+    } else {
+      const err = document.getElementById('pinError');
+      if(err) err.textContent = 'Incorrect PIN. Try again.';
+      // Shake dots
+      const dots = document.getElementById('pinDots');
+      if(dots){ dots.style.animation='shake 0.4s'; setTimeout(()=>{ dots.style.animation=''; },400); }
+      pinBuffer = '';
+      for(let i=0;i<4;i++){
+        const dot = document.getElementById('dot'+i);
+        if(dot) dot.style.background='transparent';
+      }
+    }
+  } else {
+    const err = document.getElementById('pinError');
+    if(err) err.textContent = '';
+  }
+}
+
+function exitOwnerMode() {
+  applyOwnerMode(false);
+}
+
+
+function toggleLang() {
+  currentLang = currentLang === 'ar' ? 'en' : 'ar';
+  const root = document.getElementById('htmlRoot');
+  root.lang = currentLang;
+  root.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+  document.getElementById('langToggle').textContent = currentLang === 'ar' ? 'EN' : 'عربي';
+  document.getElementById('btnReset').textContent = currentLang === 'ar' ? 'إعادة تعيين' : 'Reset';
+  document.getElementById('btnGenerate').textContent = currentLang === 'ar' ? 'إنشاء العرض ✦' : 'Generate Offer ✦';
+  renderTypeGrid();
+  renderCrewTable();
+  renderEquipGrid();
+  renderPostOptions();
+  renderRegionGrid();
+  updateReelBreakdown();
+  updateQuote();
+  saveState();
+}
+
+function L(ar, en) { return currentLang === 'ar' ? ar : en; }
+
+// ══════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  const hadSaved = loadState();
+
+  // Apply language
+  const root = document.getElementById('htmlRoot');
+  root.lang = currentLang;
+  root.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+  document.getElementById('langToggle').textContent = currentLang === 'ar' ? 'EN' : 'عربي';
+  document.getElementById('btnReset').textContent = currentLang === 'ar' ? 'إعادة تعيين' : 'Reset';
+  document.getElementById('btnGenerate').textContent = currentLang === 'ar' ? 'إنشاء العرض ✦' : 'Generate Offer ✦';
+
+  // Restore form fields
+  const el = (id) => document.getElementById(id);
+  if(el('quoteDate')) el('quoteDate').value = state.quoteDate;
+  if(el('preparedBy')) el('preparedBy').value = state.preparedBy;
+  if(el('deliveryDays')) el('deliveryDays').value = state.deliveryDays;
+  if(el('clientName')) el('clientName').value = state.clientName;
+  if(el('clientCompany')) el('clientCompany').value = state.clientCompany;
+  if(el('projectTitle')) el('projectTitle').value = state.projectTitle;
+  if(el('projectNotes')) el('projectNotes').value = state.projectNotes;
+  if(el('customEquip')) el('customEquip').value = state.customEquip || '';
+  if(el('customTravel')) el('customTravel').value = state.customTravel || '';
+  if(el('reelCount')) el('reelCount').textContent = state.reelCount;
+  if(el('daysDisplay')) el('daysDisplay').textContent = state.days;
+  if(el('reelWrap')) el('reelWrap').style.display = state.projectType==='reels'?'block':'none';
+
+  renderTypeGrid();
+  renderEquipGrid();
+  renderPostOptions();
+  renderRegionGrid();
+  renderCrewTable();
+  if(state.projectType==='reels') updateReelBreakdown();
+  updateQuote();
+  if(hadSaved && state.step) goStep(state.step);
+
+  // Restore owner mode
+  try { if(localStorage.getItem(OWNER_LS)==='1') applyOwnerMode(true); } catch(e){}
+
+  // Auto-save on any input change
+  document.addEventListener('change', saveState);
+  document.addEventListener('click', saveState);
+});
+
+// ══════════════════════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════════════════════
+function goStep(n) {
+  if(navigator.vibrate) navigator.vibrate(30);
+  playTick();
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.step-tab').forEach((t,i)=>{
+    t.classList.remove('active','done');
+    if(i+1<n) t.classList.add('done');
+    if(i+1===n) {
+      t.classList.add('active');
+      t.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    }
+  });
+  document.getElementById('sec-'+n).classList.add('active');
+  state.step = n;
+
+  const pb = document.getElementById('topProgressBar');
+  if(pb) pb.style.width = ((n/6)*100) + '%';
+  
+  const mobBtn = document.querySelector('.mobile-quote-bar .mq-btn');
+  if(mobBtn) {
+    if(n < 6) {
+      mobBtn.innerHTML = '<span class="ar-only">التالي ←</span><span class="en-only">Next →</span>';
+      mobBtn.onclick = () => goStep(n + 1);
+    } else {
+      mobBtn.innerHTML = '<span class="ar-only">إنشاء العرض ✦</span><span class="en-only">Generate ✦</span>';
+      mobBtn.onclick = showPreview;
+    }
+  }
+
+  document.getElementById('rushNote').style.display = state.deliveryDays==='rush'?'block':'none';
+  const mainEl = document.querySelector('.main');
+  if(mainEl) mainEl.scrollTop = 0;
+  window.scrollTo({top:0, behavior:'smooth'});
+  saveState();
+}
+
+// ══════════════════════════════════════════════════════════════
+// STEP 1: PROJECT TYPE & REELS
+// ══════════════════════════════════════════════════════════════
+function renderTypeGrid() {
+  const grid = document.getElementById('typeGrid');
+  grid.innerHTML = PROJECT_TYPES.filter(t => t.id !== 'reels').map(t=>`
+    <div class="type-wrapper">
+      <div class="type-card grain-card ${state.projectType===t.id?'sel':''}" onclick="selectType('${t.id}')">
+        <span class="type-icon">${t.icon}</span>
+        <div class="type-name">${L(t.ar, t.name)}</div>
+      </div>
+      <div class="type-tooltip">${L(t.descAr, t.desc)}</div>
+    </div>`).join('');
+}
+
+function selectType(id) {
+  state.projectType = id;
+  const type = PROJECT_TYPES.find(t=>t.id===id);
+
+  // Set default crew
+  ROLES.forEach(r=>{
+    let enabled = false;
+    let qty = 1;
+    if(id==='reels') {
+      enabled = r.id==='cinematographer';
+    } else if(id==='interview') {
+      if(r.id==='cinematographer') { enabled=true; qty=2; }
+      else if(r.id==='sound') { enabled=true; }
+    } else {
+      enabled = type.crew && type.crew.includes(r.id);
+    }
+    state.crew[r.id] = {enabled, rate:r.rate, qty};
+  });
+
+  // Set default equipment
+  if(type.defaultEquip) {
+     state.equipment = type.defaultEquip;
+  } else {
+     state.equipment = 'basic';
+  }
+  
+  if (id === 'reels') {
+      state.reelsEquipFree = true;
+  } else {
+      state.reelsEquipFree = false;
+  }
+  state.equipMode = 'tier';
+
+  // Set default post-production
+  state.post = {};
+  if(type.defaultPost) {
+     type.defaultPost.forEach(p => {
+         state.post[p] = { enabled: true, rate: POST_OPTIONS.find(o=>o.id===p)?.basePrice||150, qty: 1 };
+     });
+  }
+  
+  state.reelsEditingFree = (id === 'reels');
+
+  const isReels = id==='reels';
+  const trustBanner = document.getElementById('trust-banner');
+  const typeName = L(type.ar, type.name);
+  if(trustBanner) {
+    trustBanner.style.display = 'block';
+    document.getElementById('trust-banner-text').textContent = L(`بناءً على اختيارك لمشروع (${typeName})، قمنا بتحديد الطاقم والمعدات الموصى بها لضمان أفضل نتيجة لك. يمكنك التعديل كما تشاء.`, `Based on your selection (${typeName}), we've pre-selected the optimal crew and equipment. Feel free to adjust.`);
+  }
+  const reelWrap = document.getElementById('reelWrap');
+  if(reelWrap) reelWrap.style.display = isReels?'block':'none';
+  
+  renderTypeGrid();
+  renderCrewTable();
+  renderEquipGrid();
+  renderPostOptions();
+  if(isReels) updateReelBreakdown();
+  updateQuote();
+  saveState();
+}
+
+function changeReels(d) {
+  state.reelCount = Math.max(1, Math.min(20, state.reelCount+d));
+  document.getElementById('reelCount').textContent = state.reelCount;
+  updateReelBreakdown();
+  updateQuote();
+  saveState();
+}
+
+function updateReelRate() {
+  // Rate is now auto-calculated based on count and region
+  updateReelBreakdown();
+}
+
+function getReelPackInfo() {
+  const count = state.reelCount;
+  const region = state.region;
+  const isAmman = region==='amman' || region==='south' || region==='petra';
+  // Pricing rules:
+  // 1 reel: Irbid=150, Amman up to 250 (use 200 as base)
+  // 3 reels pack: Irbid=135/reel, Amman=150/reel
+  // 5 reels pack: Irbid=100/reel, Amman=135/reel
+  let ratePerReel, packLabel, isSaving=false;
+  if(count>=5) {
+    ratePerReel = isAmman ? 135 : 100;
+    packLabel = L(`باقة 5 ريلز (${ratePerReel} ${state.currency||"JOD"}/ريل)`, `5-Reel Pack (${ratePerReel} ${state.currency||"JOD"}/reel)`);
+    isSaving = true;
+  } else if(count>=3) {
+    ratePerReel = isAmman ? 150 : 135;
+    packLabel = L(`باقة 3 ريلز (${ratePerReel} ${state.currency||"JOD"}/ريل)`, `3-Reel Pack (${ratePerReel} ${state.currency||"JOD"}/reel)`);
+    isSaving = true;
+  } else {
+    ratePerReel = isAmman ? 200 : 150; // single reel
+    packLabel = null;
+  }
+  return {ratePerReel, packLabel, isSaving, count, isAmman};
+}
+
+function updateReelBreakdown() {
+  if(state.projectType!=='reels') return;
+  const info = getReelPackInfo();
+  const {count, isSaving, isAmman} = info;
+  const total = count * info.ratePerReel;
+  const breakdown = document.getElementById('reelBreakdown');
+  const packNotice = document.getElementById('packNotice');
+  const packText = document.getElementById('packText');
+
+  // Sync reelRate with calculated rate
+  state.reelRate = info.ratePerReel;
+  const reelRateInput = document.getElementById('reelRate');
+  if(reelRateInput) reelRateInput.value = info.ratePerReel;
+
+  const single1 = isAmman ? 200 : 150;
+  const pack3 = isAmman ? 150 : 135;
+  const pack5 = isAmman ? 135 : 100;
+
+  if(breakdown) {
+    breakdown.innerHTML = `
+      <div class="reel-tier grain-card ${count===1?'active-tier':''}">
+        <div class="rt-label">${L('ريل واحد','1 Reel')}</div>
+        <div class="rt-price">${single1} ${state.currency||"JOD"}</div>
+        <div class="rt-save">${L('السعر الأساسي','Base Price')}</div>
+      </div>
+      <div class="reel-tier grain-card ${count>=3&&count<5?'active-tier':''}">
+        <div class="rt-label">${L('باقة 3 ريلز','3-Reel Pack')}</div>
+        <div class="rt-price">${pack3} ${state.currency||"JOD"}</div>
+        <div class="rt-save" style="color:var(--gold)">${L('توفير','Save`)} ${single1-pack3} ${state.currency||"JOD"}/${L(`ريل','reel')}</div>
+      </div>
+      <div class="reel-tier grain-card ${count>=5?'active-tier':''}">
+        <div class="rt-label">${L('باقة 5 ريلز','5-Reel Pack')}</div>
+        <div class="rt-price">${pack5} ${state.currency||"JOD"}</div>
+        <div class="rt-save" style="color:var(--gold)">${L('أفضل قيمة!','Best Value!`)} −${single1-pack5} ${state.currency||"JOD"}/${L(`ريل','reel')}</div>
+      </div>
+      <div class="reel-tier" style="border:1px solid var(--gold);background:var(--gold-dim)">
+        <div class="rt-label">${count} ${L('ريل × ','reels × ')}${info.ratePerReel} ${state.currency||"JOD"}</div>
+        <div class="rt-price">${total} ${state.currency||"JOD"}</div>
+        <div class="rt-save" style="color:var(--text3)">${L('المجموع الحالي','Current Total')}</div>
+      </div>`;
+  }
+  if(isSaving && packNotice && packText) {
+    packNotice.classList.add('show');
+    const saving = (single1 - info.ratePerReel) * count;
+    packText.textContent = L(
+      `باقة محتوى! توفير ${saving} ${state.currency||"JOD"} على ${count} ريلز في جلسة واحدة`,
+      `Content Pack! Saving ${saving} ${state.currency||"JOD"} on ${count} reels in one session`
+    );
+  } else if(packNotice) {
+    packNotice.classList.remove('show');
+  }
+  updateQuote();
+}
+
+// ══════════════════════════════════════════════════════════════
+// STEP 3: CREW
+// ══════════════════════════════════════════════════════════════
+function renderCrewTable() {
+  const tbody = document.getElementById('crewBody');
+  let rows = '';
+  ROLES.forEach(r=>{
+    if(r.id==='editor') return;
+    const s = state.crew[r.id] || {enabled:false, rate:r.rate, qty:1};
+    const daysMult = r.flatRate ? 1 : state.days;
+    const total = s.enabled ? (s.rate * s.qty * daysMult) : 0;
+    let depWarn = '';
+    if(r.id === 'cam_assistant') {
+      const showWarn = !state.crew['cinematographer'] || !state.crew['cinematographer'].enabled;
+      depWarn = `<span id="warn-cam_assistant" class="dep-warn" style="display:${showWarn ? 'inline-flex' : 'none'};" title="${L('نوصي باختيار مصور سينمائي أولاً ليقود عمل المساعد','DOP recommended first')}">⚠️</span>`;
+    }
+    rows += `<tr>
+      <td onclick="document.getElementById('cb-' + '${r.id}').click()" style="cursor:pointer; text-align:center;">
+        <input type="checkbox" id="cb-${r.id}" ${s.enabled?'checked':''} onchange="toggleRole('${r.id}',this.checked)" onclick="event.stopPropagation()">
+      </td>
+      <td class="role-info-td" style="position:relative; cursor:pointer;" onclick="document.getElementById('cb-' + '${r.id}').click()">
+        <div class="role-name">${depWarn}${r.name}</div>
+        <div class="role-name-ar">${depWarn}${r.ar}</div>
+        ${r.hint ? `<div class="hint-tooltip" style="bottom: 80%; right: 0; transform: translateY(5px); z-index: 1000;">${L(r.hintAr, r.hint)}</div>` : ''}
+      </td>
+      <td>
+        <span class="rate-display">${s.rate}</span>
+        <div class="rate-input-wrap" onclick="event.stopPropagation()">
+          <input type="number" value="${s.rate}" min="0" step="10" style="width:72px" oninput="setRate('${r.id}',this.value)">
+        </div>
+      </td>
+      <td>
+        <div class="qty-ctrl">
+          <button onclick="setQty('${r.id}',-1)">−</button>
+          <span id="qty-${r.id}">${s.qty}</span>
+          <button onclick="setQty('${r.id}',1)">+</button>
+        </div>
+      </td>
+      <td style="color:var(--gold);font-family:'Playfair Display',serif;font-size:13px;" id="rowtotal-${r.id}">
+        ${s.enabled ? total+' ' + (state.currency||'JOD') : '—'}
+      </td>
+    </tr>`;
+  });
+  if(tbody) tbody.innerHTML = rows;
+  updateDaysHint();
+}
+
+function toggleRole(id, checked) {
+  if(window.hapticPulse) hapticPulse('light');
+  if(!state.crew[id]) state.crew[id]={enabled:false,rate:ROLES.find(r=>r.id===id)?.rate||100,qty:1};
+  state.crew[id].enabled = checked;
+  updateRowTotal(id);
+  window.activePulseId='crew-'+id; updateQuote();
+  
+  // Advanced Micro-interaction: Liquid Ripple & Scale
+  if(navigator.vibrate) navigator.vibrate(checked ? [15, 30] : [10]);
+  const cb = document.getElementById('cb-'+id);
+  if(cb) {
+    const row = cb.closest('tr');
+    if(row) {
+      row.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+      row.style.transform = checked ? 'scale(1.02)' : 'scale(0.98)';
+      setTimeout(() => row.style.transform = 'scale(1)', 200);
+      
+      const rect = row.getBoundingClientRect();
+      const ripple = document.createElement('div');
+      ripple.className = 'liquid-ripple';
+      ripple.style.background = checked ? 'rgba(46, 204, 113, 0.15)' : 'rgba(255, 255, 255, 0.05)';
+      row.style.position = 'relative';
+      row.style.overflow = 'hidden';
+      ripple.style.left = '50%';
+      ripple.style.top = '50%';
+      row.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 600);
+    }
+  }
+  saveState();
+}
+
+function setRate(id, val) {
+  if(!state.crew[id]) return;
+  state.crew[id].rate = parseInt(val)||0;
+  updateRowTotal(id);
+  window.activePulseId='crew-'+id; updateQuote();
+  saveState();
+}
+
+function setQty(id, d, e) {
+  if(window.hapticPulse) hapticPulse('light');
+  const s = state.crew[id];
+  if(!s) return;
+  const roleDef = ROLES.find(role=>role.id===id);
+  const daysMult = (roleDef && roleDef.flatRate) ? 1 : (state.days||1);
+  if(e && d > 0) spawnCostGhost(e, '+' + (s.rate * daysMult) + ' ' + (state.currency||'JOD'));
+  if(e && d < 0 && s.qty > 1) spawnCostGhost(e, '-' + (s.rate * daysMult) + ' ' + (state.currency||'JOD'));
+  s.qty = Math.max(1, (s.qty||1)+d);
+  document.getElementById('qty-'+id).textContent = s.qty;
+  updateRowTotal(id);
+  window.activePulseId='crew-'+id; updateQuote();
+  saveState();
+}
+
+function updateRowTotal(id) {
+  const s = state.crew[id];
+  const el = document.getElementById('rowtotal-'+id);
+  if(!el || !s) return;
+  el.textContent = s.enabled ? (s.rate*s.qty*state.days)+' ' + (state.currency||'JOD') : '—';
+}
+
+function updateDaysHint() {
+  const el = document.getElementById('daysHint');
+  if(!el) return;
+  if(state.days>1) {
+    el.textContent = L(`(الأسعار × ${state.days} أيام)`, `(Rates × ${state.days} days)`);
+    el.classList.add('show');
+  } else {
+    el.classList.remove('show');
+  }
+}
+
+function changeDays(d) {
+  state.days = Math.max(1, Math.min(30, state.days+d));
+  document.getElementById('daysDisplay').textContent = state.days;
+  ROLES.forEach(r => updateRowTotal(r.id));
+  updateDaysHint();
+  updateEquipItemsTotal();
+  updateQuote();
+  saveState();
+}
+
+function addCustomRole() {
+  openCustomRoleModal();
+}
+
+function openCustomRoleModal() {
+  // Remove any existing modal
+  const existing = document.getElementById('customRoleModal');
+  if(existing) existing.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'customRoleModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:2000;display:flex;align-items:center;justify-content:center;padding:20px;';
+  modal.innerHTML = `
+    <div style="background:var(--dark2);border:1px solid var(--border2);max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.6);">
+      <div style="background:var(--dark);padding:18px 22px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);">
+        <div>
+          <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--text);">${L('إضافة دور مخصص','Add Custom Role')}</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:3px;letter-spacing:1px;text-transform:uppercase;">${L('سيُضاف للطاقم فوراً','Will be added to crew immediately')}</div>
+        </div>
+        <button onclick="document.getElementById('customRoleModal').remove()" style="background:transparent;border:none;color:var(--text2);font-size:22px;cursor:pointer;line-height:1;">×</button>
+      </div>
+      <div style="padding:22px;">
+        <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px;">
+          <label style="font-size:11px;font-weight:600;color:var(--text3);letter-spacing:0.5px;text-transform:uppercase;">${L('اسم الدور','Role Name')}</label>
+          <input id="crModalName" type="text" placeholder="${L('مثال: مدير الإنتاج','e.g. Production Manager')}"
+            style="background:var(--dark3);border:1px solid var(--border);color:var(--text);font-family:inherit;font-size:14px;padding:10px 12px;outline:none;width:100%;"
+            onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--border)'">
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:22px;">
+          <label style="font-size:11px;font-weight:600;color:var(--text3);letter-spacing:0.5px;text-transform:uppercase;">${L('السعر اليومي (JD)','Day Rate (JD)')}</label>
+          <input id="crModalRate" type="number" placeholder="100" min="0" step="10" value="100"
+            style="background:var(--dark3);border:1px solid var(--border);color:var(--gold);font-family:'Playfair Display',serif;font-size:20px;font-weight:700;padding:10px 12px;outline:none;width:100%;max-width:160px;"
+            onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--border)'">
+        </div>
+        <div style="display:flex;gap:10px;">
+          <button onclick="document.getElementById('customRoleModal').remove()"
+            style="flex:1;padding:11px;font-size:12px;font-weight:600;cursor:pointer;background:transparent;border:1px solid var(--border2);color:var(--text2);letter-spacing:0.5px;text-transform:uppercase;">
+            ${L('إلغاء','Cancel')}
+          </button>
+          <button onclick="confirmCustomRole()"
+            style="flex:2;padding:11px;font-size:12px;font-weight:700;cursor:pointer;background:var(--gold);color:#0c0d0f;border:none;letter-spacing:0.5px;text-transform:uppercase;">
+            + ${L('إضافة للطاقم','Add to Crew')}
+          </button>
+        </div>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  setTimeout(()=>{ const inp=document.getElementById('crModalName'); if(inp) inp.focus(); },50);
+  // Close on backdrop click
+  modal.addEventListener('click', e=>{ if(e.target===modal) modal.remove(); });
+  // Enter to confirm
+  modal.addEventListener('keydown', e=>{ if(e.key==='Enter') confirmCustomRole(); if(e.key==='Escape') modal.remove(); });
+}
+
+function confirmCustomRole() {
+  const nameEl = document.getElementById('crModalName');
+  const rateEl = document.getElementById('crModalRate');
+  const name = nameEl ? nameEl.value.trim() : '';
+  const rate = parseInt(rateEl ? rateEl.value : '0') || 0;
+  if(!name) { nameEl && (nameEl.style.borderColor='var(--red)'); nameEl && nameEl.focus(); return; }
+  const id = 'custom_'+Date.now();
+  ROLES.push({id, name, ar:name, rate});
+  state.crew[id] = {enabled:true, rate, qty:1};
+  document.getElementById('customRoleModal')?.remove();
+  renderCrewTable();
+  updateQuote();
+  saveState();
+}
+
+// ══════════════════════════════════════════════════════════════
+// STEP 4: EQUIPMENT
+// ══════════════════════════════════════════════════════════════
+function setEquipMode(mode) {
+  state.equipMode = 'tier';
+  updateQuote();
+}
+
+function renderEquipItems() { /* individual items mode removed */ }
+function toggleEquipItem(id) { /* individual items mode removed */ }
+function updateEquipItemsTotal() { /* individual items mode removed */ }
+
+function renderEquipGrid() {
+  const grid = document.getElementById('equipGrid');
+  if(!grid) return;
+  grid.innerHTML = EQUIPMENT_TIERS.map(e=>`
+    <div class="equip-card grain-card ${state.equipment===e.id?'sel':''}" onclick="selectTier('${e.id}')">
+      <div class="equip-tier">${L(e.tierAr, e.tier)}</div>
+      <div class="equip-name">${L(e.nameAr, e.name)}</div>
+      <div class="equip-list">${L(e.itemsAr, e.items)}</div>
+      <div class="equip-price">${e.price} ${state.currency||"JOD"}/${L('يوم','day')}</div>
+    </div>`).join('');
+}
+
+function selectTier(id) {
+  state.equipment = id;
+  renderEquipGrid();
+  window.activePulseId='equip'; updateQuote();
+  saveState();
+}
+
+// individual items mode removed
+
+// ══════════════════════════════════════════════════════════════
+// STEP 5: POST-PRODUCTION
+// ══════════════════════════════════════════════════════════════
+function togglePost(id, checked) {
+  let sel = state.post[id];
+  if(typeof sel === 'boolean' || !sel) {
+    sel = { enabled: false, rate: POST_OPTIONS.find(p=>p.id===id)?.basePrice||150, qty: 1 };
+  }
+  if(typeof checked === 'boolean') {
+    sel.enabled = checked;
+  } else {
+    sel.enabled = !sel.enabled;
+  }
+  state.post[id] = sel;
+  renderPostOptions();
+  window.activePulseId='post-'+id; updateQuote();
+  saveState();
+}
+
+function setPostRate(id, val) {
+  let sel = state.post[id];
+  if(typeof sel === 'boolean' || !sel) {
+    sel = { enabled: false, rate: POST_OPTIONS.find(p=>p.id===id)?.basePrice||150, qty: 1 };
+  }
+  sel.rate = parseInt(val) || 0;
+  state.post[id] = sel;
+  
+  // Update the visible rate text so it syncs if user exits owner mode
+  const cards = document.querySelectorAll('.post-option');
+  cards.forEach(card => {
+    if(card.innerHTML.includes(`'${id}'`)) {
+      const display = card.querySelector('.rate-display');
+      if(display) display.textContent = (sel.qty > 1 ? sel.qty + ' × ' : '') + sel.rate + ' ' + (state.currency||'JOD');
+    }
+  });
+
+  window.activePulseId='post-'+id; updateQuote();
+  saveState();
+}
+
+function setPostQty(id, d) {
+  let sel = state.post[id];
+  if(typeof sel === 'boolean' || !sel) {
+    sel = { enabled: false, rate: POST_OPTIONS.find(p=>p.id===id)?.basePrice||150, qty: 1 };
+  }
+  sel.qty = Math.max(1, (sel.qty||1) + d);
+  state.post[id] = sel;
+  
+  // Update the visible quantity text manually to avoid re-rendering and stealing focus
+  const cards = document.querySelectorAll('.post-option');
+  cards.forEach(card => {
+    if(card.innerHTML.includes(`'${id}'`)) {
+      const qtySpan = card.querySelector('.post-qty-box span');
+      if(qtySpan) qtySpan.textContent = sel.qty;
+      const display = card.querySelector('.rate-display');
+      if(display) display.textContent = (sel.qty > 1 ? sel.qty + ' × ' : '') + sel.rate + ' ' + (state.currency||'JOD');
+    }
+  });
+
+  window.activePulseId='post-'+id; updateQuote();
+  saveState();
+}
+
+function renderPostOptions() {
+  const isReels = state.projectType === 'reels';
+  document.getElementById('postOptions').innerHTML = POST_OPTIONS.map(p=>{
+    let sel = state.post[p.id];
+    if(typeof sel === 'boolean') {
+      sel = { enabled: sel, rate: p.basePrice, qty: 1 };
+      state.post[p.id] = sel;
+    } else if(!sel) {
+      sel = { enabled: false, rate: p.basePrice, qty: 1 };
+    }
+
+    if(isReels && p.id==='editing') {
+      return `<div class="post-option grain-card sel" style="pointer-events:none;opacity:0.85;">
+        <div class="post-option-left">
+          <input type="checkbox" checked disabled>
+          <div>
+            <div class="post-option-name">${L(p.ar, p.name)}</div>
+            <div class="post-option-desc" style="color:var(--green)">✓ ${L('مشمول في سعر الريل','Included in reel price')}</div>
+          </div>
+        </div>
+        <div class="post-price" style="color:var(--green);">${L('مشمول','Included')}</div>
+      </div>`;
+    }
+
+    const extraNote = p.scriptNote ? `<div class="post-option-desc" style="color:var(--text3);margin-top:3px;">50–100 ${state.currency||"JOD"} ${L('حسب المشروع','depending on project')}</div>` : '';
+
+    return `<div class="post-option grain-card ${sel.enabled?'sel':''}">
+      <div class="post-option-left" onclick="togglePost('${p.id}')" style="flex:1; cursor:pointer;">
+        <input type="checkbox" ${sel.enabled?'checked':''} onchange="togglePost('${p.id}', this.checked)" onclick="event.stopPropagation()">
+        <div>
+          <div class="post-option-name">${L(p.ar, p.name)}</div>
+          <div class="post-option-desc">${L(p.descAr, p.desc)}</div>
+          ${extraNote}
+        </div>
+      </div>
+      <div class="post-price-wrap" style="display:flex; align-items:center;">
+        
+        <div class="post-qty-box" onclick="event.stopPropagation()" style="margin-right:15px; margin-left:15px;">
+          <button onclick="setPostQty('${p.id}', -1)">−</button>
+          <span>${sel.qty}</span>
+          <button onclick="setPostQty('${p.id}', 1)">+</button>
+        </div>
+
+        <div class="post-price" style="min-width: 50px; text-align: end;">
+          <span class="rate-display">${sel.qty > 1 ? sel.qty + ' × ' : ''}${sel.rate} ${state.currency||"JOD"}</span>
+          <div class="rate-input-wrap" onclick="event.stopPropagation()">
+            <input type="number" value="${sel.rate}" min="0" step="10" oninput="setPostRate('${p.id}', this.value)" style="width:72px; background:var(--dark4); border:1px solid var(--border); border-radius:var(--radius-md); color:var(--foreground); font-size:13px; padding:5px 8px; text-align:center;">
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════════════
+// STEP 6: LOCATION
+// ══════════════════════════════════════════════════════════════
+function renderRegionGrid() {
+  document.getElementById('regionGrid').innerHTML = REGIONS.map(r=>`
+    <div class="region-card grain-card ${state.region===r.id?'sel':''}" onclick="selectRegion('${r.id}')">
+      <div class="region-icon">${r.icon}</div>
+      <div class="region-name">${L(r.ar, r.name)}</div>
+      <div class="region-cities">${L(r.citiesAr, r.cities)}</div>
+      <div class="region-fee">${r.fee===null?L('مخصص','Custom'):'+'+(r.fee||L('بدون رسوم','Free'))+' JD/'+L('يوم','day')}</div>
+    </div>`).join('');
+  document.getElementById('customTravelWrap').style.display = state.region==='other'?'block':'none';
+}
+
+function selectRegion(id) {
+  state.region = id;
+  renderRegionGrid();
+  if(state.projectType==='reels') updateReelBreakdown();
+  updateQuote();
+  
+  // Smart Hint: Lost in the Desert (Travel)
+  const regObj = REGIONS.find(r=>r.id===id);
+  if(regObj && regObj.fee > 0) {
+     setTimeout(() => {
+       const card = document.querySelector('.region-card.sel');
+       if(card) {
+          card.style.animation = 'gold-flash 1s';
+          setTimeout(() => card.style.animation = '', 1000);
+       }
+     }, 50);
+     let hint = document.getElementById('travel-hint');
+     if(!hint) {
+        hint = document.createElement('div');
+        hint.id = 'travel-hint';
+        hint.style.cssText = 'color:var(--gold); font-size:11px; margin-top:10px; font-weight:bold; animation: ghost-pulse 2s infinite alternate; text-align:center;';
+        document.getElementById('regionGrid').after(hint);
+     }
+     hint.innerHTML = '<span class="ar-only">تنويه: التصوير خارج العاصمة يتطلب ترتيبات سفر تم تضمينها تلقائياً.</span><span class="en-only">Note: Travel arrangements have been included automatically.</span>';
+  } else {
+     const hint = document.getElementById('travel-hint');
+     if(hint) hint.remove();
+  }
+  saveState();
+}
+
+// ══════════════════════════════════════════════════════════════
+// CALCULATION ENGINE
+// ══════════════════════════════════════════════════════════════
+function calcQuote() {
+  // ── CREW ─────────────────────────────────
+  let crewTotal = 0;
+  const crewLines = [];
+  const isReels = state.projectType==='reels';
+
+  ROLES.forEach(r=>{
+    if(r.id==='editor') return; // no longer a crew role
+    const s = state.crew[r.id];
+    if(!s || !s.enabled) return;
+    // For reels: crew is included in the reel price — show as included (cost = 0)
+    if(isReels) {
+      crewLines.push({name:r.name, nameAr:r.ar, rate:s.rate, qty:s.qty, days:state.days, total:0, isFree:true});
+      return;
+    }
+    const daysMult = r.flatRate ? 1 : state.days;
+    const total = s.rate * s.qty * daysMult;
+    crewTotal += total;
+    crewLines.push({name:r.name, nameAr:r.ar, rate:s.rate, qty:s.qty, days: r.flatRate ? 'مقطوع' : state.days, total});
+  });
+
+  // REEL PRODUCTION (separate from crew)
+  let reelTotal = 0, reelLines = [];
+  if(isReels) {
+    const info = getReelPackInfo();
+    reelTotal = info.count * info.ratePerReel;
+    reelLines.push({
+      name:`Instagram Reels Production (×${info.count})`,
+      nameAr:`إنتاج ريلز انستغرام (×${info.count})`,
+      rate:info.ratePerReel,
+      qty:info.count,
+      days:1,
+      total:reelTotal,
+      isReel:true,
+      packLabel:info.packLabel
+    });
+  }
+
+  // ── EQUIPMENT ────────────────────────────
+  let equipTotal = 0;
+  const equipLines = [];
+  const ceVal = parseInt(document.getElementById('customEquip')?.value||'0')||0;
+
+  // For reels: basic equipment is included (free), no cost added
+  const reelsBasicEquipFree = isReels && (state.equipment==='basic' || !state.equipment);
+
+  if(ceVal>0) {
+    equipTotal = ceVal * state.days;
+    equipLines.push({name:'Custom Equipment', nameAr:'معدات مخصصة', rate:ceVal, qty:1, days:state.days, total:equipTotal});
+  } else if(state.equipment && !reelsBasicEquipFree) {
+    const tier = EQUIPMENT_TIERS.find(e=>e.id===state.equipment);
+    if(tier) {
+      equipTotal = tier.price * state.days;
+      equipLines.push({name:`Equipment — ${tier.name}`, nameAr:`معدات — ${tier.nameAr}`, rate:tier.price, qty:1, days:state.days, total:equipTotal, isZero: tier.price===0});
+    }
+  }
+
+  // ── POST-PRODUCTION ───────────────────────
+  let postTotal = 0;
+  const postLines = [];
+  const isRush = state.deliveryDays==='rush';
+  const isSeven = state.deliveryDays==='7';
+  POST_OPTIONS.forEach(p=>{
+    let sel = state.post[p.id];
+    if(!sel) return;
+    if(typeof sel === 'boolean') {
+      if(!sel) return;
+      sel = { enabled: true, rate: p.basePrice, qty: 1 };
+    } else {
+      if(!sel.enabled) return;
+    }
+
+    if(state.projectType === 'reels' && p.id === 'editing') {
+      postLines.push({
+        name: p.name + L(' (مشمول بالسعر)','  (included in reel price)'),
+        nameAr: p.ar + ' (مشمول بالسعر)',
+        price: 0,
+        isFree: true
+      });
+      return;
+    }
+
+    let price = sel.rate * sel.qty;
+    let extraStrEn = '';
+    let extraStrAr = '';
+    
+    // Delivery multiplier
+    if (p.id==='editing' || p.id==='colorgrade') {
+      if (isRush) {
+        price = Math.round(price * 1.5);
+        extraStrEn = ' (Rush +50%)';
+        extraStrAr = ' (سريع +50%)';
+      } else if (isSeven) {
+        price = Math.round(price * 1.25);
+        extraStrEn = ' (7 Days +25%)';
+        extraStrAr = ' (7 أيام +25%)';
+      }
+    }
+    
+    postTotal += price;
+    postLines.push({
+      name: p.name + (sel.qty>1?' ×'+sel.qty:'') + extraStrEn,
+      nameAr: p.ar + (sel.qty>1?' ×'+sel.qty:'') + extraStrAr,
+      price
+    });
+  });
+
+  // ── TRAVEL ───────────────────────────────
+  let travelFee = 0;
+  if(state.region) {
+    const reg = REGIONS.find(r=>r.id===state.region);
+    if(reg && reg.fee!==null) travelFee = reg.fee * state.days;
+    else travelFee = parseInt(document.getElementById('customTravel')?.value||'0')||0;
+  }
+
+  // ── TOTALS & DISCOUNT ────────────────────
+  const subtotal = crewTotal + reelTotal + equipTotal + postTotal + travelFee;
+  let discountPct = 0, discountLabel = '', discountLabelAr = '';
+
+  // Advanced Tiered Discount System
+  // Dynamically scale thresholds based on currency so it remains fair.
+  let exScale = 1;
+  if (state.currency === 'USD') exScale = 1.41;
+  else if (state.currency === 'SAR') exScale = 5.29;
+  else if (state.currency === 'AED') exScale = 5.18;
+
+  const t1 = 800 * exScale;
+  const t2 = 1500 * exScale;
+  const t3 = 3000 * exScale;
+
+  if (state.discountMode === 'none') {
+    discountPct = 0;
+  } else if (state.discountMode === 'custom_pct') {
+    discountPct = state.discountVal || 0;
+    discountLabel = `Special Discount −${discountPct}%`;
+    discountLabelAr = `خصم خاص −${discountPct}%`;
+  } else if (state.discountMode === 'custom_amt') {
+    // Custom amount will be handled below
+    discountPct = 0;
+  } else {
+    // Auto Volume Discount
+    if (subtotal >= t3) {
+      discountPct = 10; 
+      discountLabel = 'Premium Volume Discount −10%'; 
+      discountLabelAr = 'خصم ذهبي (حجم عمل) −10%';
+    } else if (subtotal >= t2) {
+      discountPct = 7; 
+      discountLabel = 'Volume Discount −7%'; 
+      discountLabelAr = 'خصم فضي (حجم عمل) −7%';
+    } else if (subtotal >= t1) {
+      discountPct = 5; 
+      discountLabel = 'Project Discount −5%'; 
+      discountLabelAr = 'خصم تشجيعي −5%';
+    }
+  }
+
+  let rawDiscount = Math.round(subtotal * discountPct/100);
+  if (state.discountMode === 'custom_amt') {
+    rawDiscount = state.discountVal || 0;
+    discountLabel = 'Special Discount';
+    discountLabelAr = 'خصم خاص';
+  }
+  
+  let afterDiscount = subtotal - rawDiscount;
+  
+  // Round DOWN to the nearest 5 to guarantee a clean number and a better deal for the customer
+  let totalRounded = Math.floor(afterDiscount / 5) * 5; 
+  
+  // The final discount amount they saved is the exact difference
+  let discountAmt = subtotal - totalRounded;
+
+  // If there was no formal discount, but rounding triggered a discount, give it a nice name
+  if (discountAmt > 0 && discountPct === 0 && state.discountMode !== 'custom_amt') {
+    discountLabel = 'Promo Discount';
+    discountLabelAr = 'خصم تشجيعي';
+  }
+
+  return {
+    crewTotal, crewLines,
+    reelTotal, reelLines,
+    equipTotal, equipLines,
+    postTotal, postLines,
+    travelFee,
+    subtotal,
+    discountPct, discountAmt, discountLabel, discountLabelAr,
+    total: totalRounded,
+    rawTotal: subtotal
+  };
+}
+
+// ══════════════════════════════════════════════════════════════
+// SIDEBAR UPDATE
+// ══════════════════════════════════════════════════════════════
+function updateQuote() {
+  // Update Equipment Pro Warning
+  const warnEquipPro = document.getElementById('warn-equip-pro');
+  if(warnEquipPro) {
+    const isProEquip = state.equipment === 'pro' || state.equipment === 'red';
+    const hasDOP = state.crew['cinematographer'] && state.crew['cinematographer'].enabled;
+    warnEquipPro.style.display = (isProEquip && !hasDOP) ? 'block' : 'none';
+  }
+  const warnCamAss = document.getElementById('warn-cam_assistant');
+  if(warnCamAss) {
+    const dopEnabled = state.crew['cinematographer'] && state.crew['cinematographer'].enabled;
+    warnCamAss.style.display = dopEnabled ? 'none' : 'inline-flex';
+  }
+
+  // Sync state from inputs
+  const sync = (id, key) => { const el=document.getElementById(id); if(el) state[key]=el.value; };
+  sync('clientName','clientName'); sync('clientCompany','clientCompany');
+  sync('projectTitle','projectTitle'); sync('quoteDate','quoteDate');
+  sync('preparedBy','preparedBy'); sync('deliveryDays','deliveryDays');
+  sync('projectNotes','projectNotes');
+  state.reelRate = parseInt(document.getElementById('reelRate')?.value||'150')||150;
+  state.customEquip = parseInt(document.getElementById('customEquip')?.value||'0')||0;
+  state.customTravel = parseInt(document.getElementById('customTravel')?.value||'0')||0;
+
+  if(!state.projectType) return;
+  const q = calcQuote();
+  const isReels = state.projectType==='reels';
+
+  // Discount bar
+  const db = document.getElementById('discountBar');
+  if(q.discountAmt>0) {
+    db.classList.add('show');
+    document.getElementById('discountPct').textContent = L(q.discountLabelAr, q.discountLabel);
+  } else { db.classList.remove('show'); }
+
+  // Feature: Ghost Quote Check (Mobile Bar & Send Button)
+  const mobileBar = document.querySelector('.mobile-quote-bar');
+  const waBtn = document.querySelector('.btn-wa');
+  const totalVal = q.total;
+
+  if (totalVal === 0 && state.projectType) {
+    if(mobileBar) {
+       mobileBar.style.backgroundColor = 'var(--dark4)';
+       mobileBar.style.animation = 'ghost-pulse 2s infinite alternate';
+    }
+    if(waBtn) {
+      waBtn.style.display = 'none';
+      let ghostHint = document.getElementById('ghost-hint');
+      if(!ghostHint) {
+        ghostHint = document.createElement('div');
+        ghostHint.id = 'ghost-hint';
+        ghostHint.style.cssText = 'color:var(--text3); font-size:12px; margin-top:8px; animation: ghost-pulse 2s infinite alternate; text-align:center; padding:10px; background: rgba(0,0,0,0.1); border-radius:6px;';
+        ghostHint.innerHTML = '<span class="ar-only">يبدو أن مشروعك لا يحتوي على خدمات فعلية.. هل تحتاج مساعدة في الاختيار؟</span><span class="en-only">Your project seems empty.. need help?</span>';
+        waBtn.parentElement.insertBefore(ghostHint, waBtn);
+      }
+      ghostHint.style.display = 'block';
+    }
+  } else {
+    if(mobileBar) {
+       mobileBar.style.backgroundColor = '';
+       mobileBar.style.animation = '';
+    }
+    if(waBtn) {
+      waBtn.style.display = 'flex';
+      const ghostHint = document.getElementById('ghost-hint');
+      if(ghostHint) ghostHint.style.display = 'none';
+    }
+  }
+
+  // Mobile total
+  const mt = document.getElementById('mobileTotal');
+  if(mt.textContent !== q.total+' ' + (state.currency||'JOD')){
+    animateValue(mt, parseInt(mt.textContent)||0, q.total, 400);
+    mt.classList.remove('sb-total-bump');
+    void mt.offsetWidth;
+    mt.classList.add('sb-total-bump');
+  }
+
+  // Build sidebar HTML
+  const type = PROJECT_TYPES.find(t=>t.id===state.projectType);
+  let html = `<div class="sb-section">
+    <div class="sb-section-title">${L('المشروع','Project')}</div>
+    <div class="sb-line">
+      <span class="sb-line-label">${type?.icon||''} ${L(type?.ar||'',type?.name||'—')}</span>
+      <span class="sb-line-val muted">${state.days} ${L('يوم','day')}</span>
+    </div>
+    ${state.projectType==='reels'?`<div class="sb-line"><span class="sb-line-label">${L('عدد الريلز','Reels')}</span><span class="sb-line-val">${state.reelCount}</span></div>`:''}
+  </div>`;
+
+  if(q.reelTotal>0) {
+    html+=`<div class="sb-section"><div class="sb-section-title">${L('إنتاج الريلز','Reel Production')}</div>`;
+    q.reelLines.forEach(l=>{
+      const packInfo = l.packLabel ? `<div style="font-size:10px;color:var(--green);margin-top:2px;">🎯 ${l.packLabel}</div>` : '';
+      html+=`<div class="sb-line"><span class="sb-line-label">${state.reelCount} ${L('ريل','reels')} × ${l.rate} ${state.currency||"JOD"}${packInfo?'<br>'+packInfo:''}</span><span class="sb-line-val">${l.total} ${state.currency||"JOD"}</span></div>`;
+    });
+    html+=`</div>`;
+  }
+
+  if(q.crewTotal>0 || (q.crewLines.length>0 && isReels)) {
+    html+=`<div class="sb-section"><div class="sb-section-title">${L('الطاقم','Crew')}</div>`;
+    q.crewLines.forEach(l=>{
+      if(l.isFree) {
+        html+=`<div class="sb-line ${window.activePulseId==='crew-'+l.id ? 'pulse-update' : ''}"><span class="sb-line-label">${L(l.nameAr,l.name)}${l.qty>1?' ×'+l.qty:''}</span><span class="sb-line-val" style="color:var(--green);font-family:'Inter',sans-serif;font-size:11px;">✓ ${L('مشمول','Incl.')}</span></div>`;
+      } else {
+        html+=`<div class="sb-line ${window.activePulseId==='crew-'+l.id ? 'pulse-update' : ''}"><span class="sb-line-label">${L(l.nameAr,l.name)}${l.qty>1?' ×'+l.qty:''}</span><span class="sb-line-val">${l.total} ${state.currency||"JOD"}</span></div>`;
+      }
+    });
+    html+=`</div>`;
+  }
+
+  if(state.projectType==='reels' && (state.equipment==='basic' || !state.equipment)) {
+    html+=`<div class="sb-section"><div class="sb-section-title">${L('المعدات','Equipment')}</div>
+    <div class="sb-line"><span class="sb-line-label">📦 ${L('المعدات الأساسية','Basic Equipment')}</span><span class="sb-line-val" style="color:var(--green)">✓ ${L('مشمولة','Included')}</span></div></div>`;
+  } else if(q.equipTotal>0 || q.equipLines.some(l=>l.isZero)) {
+    html+=`<div class="sb-section"><div class="sb-section-title">${L('المعدات','Equipment')}</div>`;
+    html+=`<div class="sb-line ${window.activePulseId==='equip' ? 'pulse-update' : ''}"><span class="sb-line-label">${q.equipLines.some(l=>l.isZero) ? L('معدات — من العميل', 'Equipment — Provided') : L('إيجار معدات','Equipment Rental')}</span><span class="sb-line-val" ${q.equipLines.some(l=>l.isZero) ? 'style="color:var(--green);font-size:11px;"' : ''}>${q.equipLines.some(l=>l.isZero) ? '✓ ' + L('مجاناً','Included') : q.equipTotal + ' ' + (state.currency||"JOD")}</span></div>`;
+    html+=`</div>`;
+  }
+
+  if(q.postTotal>0 || q.postLines.some(l=>l.isFree)) {
+    html+=`<div class="sb-section"><div class="sb-section-title">${L('ما بعد الإنتاج','Post-Production')}</div>`;
+    q.postLines.forEach(l=>{
+      if(l.isFree) {
+        html+=`<div class="sb-line ${window.activePulseId==='post-'+l.id ? 'pulse-update' : ''}"><span class="sb-line-label">${L(l.nameAr,l.name)}</span><span class="sb-line-val" style="color:var(--green);font-family:'Inter',sans-serif;font-size:11px;">✓ ${L('مشمول','Incl.')}</span></div>`;
+      } else {
+        html+=`<div class="sb-line ${window.activePulseId==='post-'+l.id ? 'pulse-update' : ''}"><span class="sb-line-label">${L(l.nameAr,l.name)}</span><span class="sb-line-val">${l.price} ${state.currency||"JOD"}</span></div>`;
+      }
+    });
+    html+=`</div>`;
+  }
+
+  if(q.travelFee>0) {
+    const reg = REGIONS.find(r=>r.id===state.region);
+    html+=`<div class="sb-section"><div class="sb-section-title">${L('السفر','Travel')}</div>
+    <div class="sb-line"><span class="sb-line-label">${L(reg?.ar||'سفر',reg?.name||'Travel')}</span><span class="sb-line-val">${q.travelFee} ${state.currency||"JOD"}</span></div></div>`;
+  }
+  
+  if(q.discountAmt > 0) {
+    html+=`<div class="sb-section"><div class="sb-section-title" style="color:var(--gold)">${L('الخصم','Discount')}</div>
+    <div class="sb-line"><span class="sb-line-label" style="color:var(--gold); font-weight:700;">${L(q.discountLabelAr, q.discountLabel)}</span><span class="sb-line-val" style="color:var(--gold); font-weight:700;">− ${q.discountAmt} ${state.currency||"JOD"}</span></div></div>`;
+  }
+
+  html+=`<hr class="sb-divider" style="margin-top:18px;border-top:2px solid var(--gold-b);">
+  <div class="sb-total">
+    <div>
+      <div class="sb-total-label">${L('المجموع الكلي','Total Quote')}</div>
+      ${q.discountAmt>0?`<div class="sb-total-old">${q.rawTotal} ${state.currency||"JOD"}</div>`:''}
+    </div>
+    <div style="text-align:end">
+      <div class="sb-total-new">${q.total} ${state.currency||"JOD"}</div>
+      ${q.discountAmt>0?`<div class="sb-discount-badge">${L('توفير','SAVE')} ${q.discountAmt} ${state.currency||"JOD"}</div>`:''}
+    </div>
+  </div>`;
+
+  document.getElementById('sbBody').innerHTML = html;
+}
+
+// ══════════════════════════════════════════════════════════════
+// PRICE OFFER DOCUMENT
+// ══════════════════════════════════════════════════════════════
+function showInlineAlert(msgAr, msgEn) {
+  const existing = document.getElementById('inlineAlertOverlay');
+  if(existing) existing.remove();
+  const ov = document.createElement('div');
+  ov.id = 'inlineAlertOverlay';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:3000;display:flex;align-items:center;justify-content:center;padding:20px;';
+  ov.innerHTML = `
+    <div style="background:var(--dark2);border:1px solid var(--border2);max-width:360px;width:100%;text-align:center;">
+      <div style="padding:28px 24px;">
+        <div style="font-size:32px;margin-bottom:12px;">⚠️</div>
+        <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px;">${L(msgAr, msgEn)}</div>
+      </div>
+      <div style="border-top:1px solid var(--border);padding:14px 24px;">
+        <button onclick="document.getElementById('inlineAlertOverlay').remove();goStep(1);"
+          style="background:var(--gold);color:#0c0d0f;border:none;padding:11px 28px;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:0.5px;width:100%;">
+          ${L('اختر نوع المشروع','Select Project Type')}
+        </button>
+      </div>
+    </div>`;
+  document.body.appendChild(ov);
+  ov.addEventListener('click', e=>{ if(e.target===ov) ov.remove(); });
+}
+
+
+window.resetCustom = function(key) {
+  state[key] = null;
+  saveState();
+  showPreview();
+}
+
+function showPreview() {
+  if(!state.projectType){ showInlineAlert('يرجى اختيار نوع المشروع أولاً','Please select a project type first.'); return; }
+  
+  const cName = document.getElementById('clientName');
+  if(!cName.value.trim()){
+    goStep(2);
+    cName.classList.add('shake-error');
+    setTimeout(()=>cName.classList.remove('shake-error'), 500);
+    cName.focus();
+    return;
+  }
+
+  const btns = document.querySelectorAll('#btnGenerate, .mq-btn');
+  const oldTexts = [];
+  btns.forEach((btn, i) => { 
+    oldTexts[i] = btn.innerHTML; 
+    btn.innerHTML = '<span class="ar-only">جاري الحساب...</span><span class="en-only">Calculating...</span>'; 
+    btn.style.opacity = '0.7'; 
+    btn.style.pointerEvents = 'none'; 
+  });
+  
+  setTimeout(() => {
+    btns.forEach((btn, i) => { 
+      btn.innerHTML = oldTexts[i]; 
+      btn.style.opacity = '1'; 
+      btn.style.pointerEvents = 'auto'; 
+    });
+    
+    const q = calcQuote();
+    const type = PROJECT_TYPES.find(t=>t.id===state.projectType);
+    const today = state.quoteDate || new Date().toISOString().split('T')[0];
+    const region = REGIONS.find(r=>r.id===state.region);
+
+  // Calculate expiry date (30 days from quote date)
+  const quoteD = new Date(today);
+  quoteD.setDate(quoteD.getDate()+30);
+  const expiryDate = quoteD.toISOString().split('T')[0];
+
+  let rows = '';
+
+  // Reel lines
+  q.reelLines.forEach(l=>{
+    const packInfo = l.packLabel ? `<br><span style="font-size:11px;color:var(--green)">🎯 Content Pack — ${l.packLabel}</span>` : '';
+    rows+=`<tr>
+      <td>${l.name}${packInfo}</td>
+      <td>${l.rate} ${state.currency||"JOD"}/reel</td>
+      <td>${l.qty} reel${l.qty>1?'s':''}</td>
+      <td>${l.total} ${state.currency||"JOD"}</td>
+    </tr>`;
+  });
+
+  // Crew lines
+  q.crewLines.forEach(l=>{
+    if(l.isFree) {
+      rows+=`<tr>
+        <td>${l.name}${l.qty>1?' ×'+l.qty:''}<br><span style="font-size:11px;color:var(--green)">Included in reel price</span></td>
+        <td style="color:var(--green)">—</td>
+        <td>—</td>
+        <td style="color:var(--green)">Included</td>
+      </tr>`;
+    } else {
+      rows+=`<tr>
+        <td>${l.name}</td>
+        <td>${l.rate} ${state.currency||"JOD"}/day</td>
+        <td>${l.qty>1?l.qty+'× ':''}${l.days} day${l.days>1?'s':''}</td>
+        <td>${l.total} ${state.currency||"JOD"}</td>
+      </tr>`;
+    }
+  });
+
+  // Equipment lines
+  if(state.projectType==='reels' && (state.equipment==='basic'||!state.equipment)) {
+    rows+=`<tr>
+      <td>Equipment — Basic Setup<br><span style="font-size:11px;color:var(--green)">Included in reel price</span></td>
+      <td style="color:var(--green)">—</td>
+      <td>—</td>
+      <td style="color:var(--green)">Included</td>
+    </tr>`;
+  } else if(q.equipTotal>0) {
+    const tier = EQUIPMENT_TIERS.find(e=>e.id===state.equipment);
+    rows+=`<tr>
+      <td>Equipment Rental${tier?'<br><span style="font-size:11px;color:var(--text3)">'+tier.name+'</span>':''}</td>
+      <td>${Math.round(q.equipTotal/state.days)} ${state.currency||"JOD"}/day</td>
+      <td>${state.days} day${state.days>1?'s':''}</td>
+      <td>${q.equipTotal} ${state.currency||"JOD"}</td>
+    </tr>`;
+  }
+
+  // Post lines
+  q.postLines.forEach(l=>{
+    if(l.isFree) {
+      rows+=`<tr>
+        <td>${l.name}</td>
+        <td style="color:var(--green)">—</td>
+        <td>—</td>
+        <td style="color:var(--green)">Included</td>
+      </tr>`;
+    } else {
+      rows+=`<tr>
+        <td>${l.name}</td>
+        <td>${l.price} ${state.currency||"JOD"}</td>
+        <td>1</td>
+        <td>${l.price} ${state.currency||"JOD"}</td>
+      </tr>`;
+    }
+  });
+
+  // Travel
+  if(q.travelFee>0) {
+    rows+=`<tr>
+      <td>Travel / Transportation${region?'<br><span style="font-size:11px;color:var(--text3)">'+region.name+'</span>':''}</td>
+      <td>${Math.round(q.travelFee/state.days)} ${state.currency||"JOD"}/day</td>
+      <td>${state.days} day${state.days>1?'s':''}</td>
+      <td>${q.travelFee} ${state.currency||"JOD"}</td>
+    </tr>`;
+  }
+
+  const delivLabel = state.deliveryDays==='rush'?'3 days or less (Rush Delivery)':`${state.deliveryDays} working days after shooting`;
+  const randCode = Math.random().toString(36).substring(2, 6).toUpperCase();
+  const dateStr = today.replace(/-/g, '').substring(2);
+  const refNumber = `FH-${dateStr}-${randCode}`;
+  
+  let paymentText = '— Down payment of 50% upon signing the contract.<br>— Final payment of 50% upon delivery of the final version.<br>';
+  if(state.paymentTerms === '30_40_30') {
+    paymentText = '— Down payment of 30% upon signing, 40% before production, 30% upon final delivery.<br>';
+  } else if(state.paymentTerms === 'net_30') {
+    paymentText = '— Payment is due Net 30 days after final delivery.<br>';
+  }
+
+  document.getElementById('quotePreview').innerHTML = `
+  <div class="quote-doc">
+    <div class="q-top">
+      <div class="q-title">PRICE OFFER</div>
+      <div class="q-subtitle">${state.projectTitle || type.name}</div>
+      <div class="q-meta">
+        <div class="q-meta-block">
+          <p><strong>From:</strong></p>
+          <p>${state.preparedBy}</p>
+          <p>Faii House Production</p>
+          <p>Faii.House.jo@gmail.com</p>
+          <p>+962799256345</p>
+        </div>
+        <div class="q-meta-block">
+          ${state.clientName?`<p><strong>To:</strong></p><p>${state.clientName}</p>${state.clientCompany?`<p>${state.clientCompany}</p>`:''}`:''}
+        </div>
+        <div class="q-meta-block" style="text-align:end;">
+          <p><strong>REF:</strong> ${refNumber}</p>
+          <p><strong>Date:</strong> ${today}</p>
+          <p><strong>Valid Until:</strong> ${expiryDate}</p>
+          <p><strong>Delivery:</strong> ${delivLabel}</p>
+          <p><strong>Days:</strong> ${state.days} shooting day${state.days>1?'s':''}</p>
+          ${state.projectType==='reels'?`<p><strong>Reels:</strong> ${state.reelCount}</p>`:''}
+        </div>
+      </div>
+    </div>
+    <div class="q-divider"></div>
+    <div class="q-body">
+      <table class="q-table">
+        <thead>
+          <tr>
+            <th>Item Description</th>
+            <th>Cost</th>
+            <th>Qty / Duration</th>
+            <th>Price</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows}
+          ${q.discountAmt > 0 ? `<tr>
+            <td colspan="3" style="text-align:right; font-weight:700; color:var(--gold);">${q.discountLabel}</td>
+            <td style="font-weight:700; color:var(--gold);">− ${q.discountAmt} ${state.currency||"JOD"}</td>
+          </tr>` : ''}
+        </tbody>
+      </table>
+      <div class="q-subtotal">
+        <div>
+          <div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:1.5px">TOTAL</div>
+          <div style="font-size:11px;color:var(--text3)">All services included · Tax-exempt</div>
+        </div>
+        <div style="display:flex;align-items:baseline;gap:12px">
+          ${q.discountAmt>0?`<span class="q-sub-old">${q.rawTotal} ${state.currency||"JOD"}</span>`:''}
+          <span class="q-sub-new">${q.total} ${state.currency||"JOD"}</span>
+        </div>
+      </div>
+      ${q.discountAmt>0?`<div style="background:rgba(212,175,55,0.08);border:1px solid rgba(212,175,55,0.2);padding:10px 14px;font-size:12px;color:var(--gold);margin-bottom:18px;">
+        🎯 ${q.discountLabel} applied — You save ${q.discountAmt} ${state.currency||"JOD"}
+      </div>`:''}
+      
+      
+      <div class="q-details-wrap" style="position:relative; margin-bottom:20px;">
+        <div style="font-size:10px;font-weight:700;color:var(--text3);letter-spacing:2px;margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+          <span>DETAILS & TERMS</span>
+          ${isOwnerMode ? `<button class="btn-sm btn-ghost" onclick="resetCustom(\'customTerms\')" style="font-size:9px; padding:2px 8px; min-height:0; display:${state.customTerms?'inline-flex':'none'};">Reset Default</button>` : ''}
+        </div>
+        <div class="q-details" 
+             ${isOwnerMode ? 'contenteditable="true" spellcheck="false" onblur="state.customTerms=this.innerHTML;saveState();"' : ''} 
+             style="${isOwnerMode ? 'outline:none; padding:12px; border:1px dashed var(--border); border-radius:8px; cursor:text; margin-bottom:0;' : 'margin-bottom:0;'}">
+          ${state.customTerms ? state.customTerms : `— Video delivery: ${delivLabel}.<br>
+— This offer is valid until: <strong style="color:var(--text)">${expiryDate}</strong> (30 days from issue date).<br>
+— Client has the right to request changes · ${state.deliveryDays==='rush'?'1 revision':'2 revisions'} included.<br>
+${paymentText}— Equipment rental and transportation fees are included in the total.<br>
+— The above price is final and tax-exempt.<br>
+${state.projectNotes?'— '+state.projectNotes+'<br>':''}
+— Any additional taxes imposed by relevant authorities are the responsibility of the client.`}
+        </div>
+        ${isOwnerMode ? '<div style="font-size:9px; color:var(--primary); margin-top:6px; text-align:right;">✦ You can click and edit the text above. It will be saved automatically.</div>' : ''}
+      </div>
+    </div>
+    <div class="q-footer" style="${isOwnerMode ? 'align-items:flex-start;' : ''}">
+      <div class="q-footer-left">
+        <div class="ty" style="margin-bottom:10px;">Thank<br>You<span>.</span></div>
+        ${isOwnerMode ? `<button class="btn-sm btn-ghost" onclick="resetCustom('customContact')" style="font-size:9px; padding:2px 8px; min-height:0; display:${state.customContact?'inline-flex':'none'}; margin-bottom:4px;">Reset Default</button>` : ''}
+        <div class="contact" 
+             ${isOwnerMode ? 'contenteditable="true" spellcheck="false" onblur="state.customContact=this.innerHTML;saveState();"' : ''} 
+             style="${isOwnerMode ? 'outline:none; padding:8px; border:1px dashed var(--border); border-radius:6px; cursor:text;' : ''}">
+          ${state.customContact ? state.customContact : `Faii.House.jo@gmail.com<br>+962799256345<br>+962796016640`}
+        </div>
+      </div>
+      <div class="q-footer-right" style="${isOwnerMode ? 'display:flex; flex-direction:column; align-items:flex-end;' : ''}">
+        <div class="send" style="margin-bottom:10px;">SEND<br>PAYMENT</div>
+        ${isOwnerMode ? `<button class="btn-sm btn-ghost" onclick="resetCustom('customBank')" style="font-size:9px; padding:2px 8px; min-height:0; display:${state.customBank?'inline-flex':'none'}; margin-bottom:4px;">Reset Default</button>` : ''}
+        <div class="cliq" 
+             ${isOwnerMode ? 'contenteditable="true" spellcheck="false" onblur="state.customBank=this.innerHTML;saveState();"' : ''} 
+             style="${isOwnerMode ? 'outline:none; padding:8px; border:1px dashed var(--border); border-radius:6px; cursor:text; text-align:right;' : ''}">
+          ${state.customBank ? state.customBank : `CliQ: AHMAD00HAD<br>IBAN: JO47ARAB181000000018121212308500`}
+        </div>
+      </div>
+    </div>
+  </div>`;
+  document.getElementById('quoteModal').classList.add('show');
+  playSuccess();
+  if(typeof confetti === 'function') {
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 },
+      colors: ['#D4AF37', '#ffffff', '#2ecc71']
+    });
+  }
+  }, 800);
+}
+
+function closeModal() {
+  document.getElementById('quoteModal').classList.remove('show');
+}
+
+// ══════════════════════════════════════════════════════════════
+// WHATSAPP
+// ══════════════════════════════════════════════════════════════
+function sendWhatsApp() {
+  if(!state.projectType){
+    showInlineAlert('يرجى إنشاء عرض السعر أولاً','Please build a quote first.');
+    return;
+  }
+  const q = calcQuote();
+  const type = PROJECT_TYPES.find(t=>t.id===state.projectType);
+  const today = state.quoteDate || new Date().toISOString().split('T')[0];
+  const quoteD = new Date(today);
+  quoteD.setDate(quoteD.getDate()+30);
+  const expiryDate = quoteD.toISOString().split('T')[0];
+
+  let msg = `*Faii House Production — Price Offer*\n`;
+  msg += `━━━━━━━━━━━━━━━━━━━━\n`;
+  if(state.clientName) msg += `*Client:* ${state.clientName}${state.clientCompany?' — '+state.clientCompany:''}\n`;
+  msg += `*Project:* ${state.projectTitle || type.name}\n`;
+  msg += `*Date:* ${today}  |  *Valid Until:* ${expiryDate}\n`;
+  msg += `*Shooting Days:* ${state.days}\n`;
+  if(state.projectType==='reels') msg += `*Reels:* ${state.reelCount}\n`;
+  msg += `━━━━━━━━━━━━━━━━━━━━\n`;
+  if(q.crewTotal>0) msg += `🎬 *Crew:* ${q.crewTotal} ${state.currency||"JOD"}\n`;
+  if(q.reelTotal>0) msg += `📱 *Reel Production:* ${q.reelTotal} ${state.currency||"JOD"}\n`;
+  if(q.equipTotal>0) msg += `📷 *Equipment:* ${q.equipTotal} ${state.currency||"JOD"}\n`;
+  if(q.postTotal>0) msg += `🎞 *Post-Production:* ${q.postTotal} ${state.currency||"JOD"}\n`;
+  if(q.travelFee>0) msg += `🚗 *Travel:* ${q.travelFee} ${state.currency||"JOD"}\n`;
+  msg += `━━━━━━━━━━━━━━━━━━━━\n`;
+  if(q.discountAmt>0) msg += `💚 *${q.discountLabel}* — Save ${q.discountAmt} ${state.currency||"JOD"}\n`;
+  msg += `💰 *TOTAL: ${q.total} ${state.currency||"JOD"}*\n`;
+  msg += `━━━━━━━━━━━━━━━━━━━━\n`;
+  msg += `Down payment 50% upon contract signing.\nFaii.House.jo@gmail.com`;
+
+  const url = `https://wa.me/962799256345?text=${encodeURIComponent(msg)}`;
+  window.open(url, '_blank');
+}
+
+// ══════════════════════════════════════════════════════════════
+// NEGOTIATE
+// ══════════════════════════════════════════════════════════════
+function openNegotiate(){
+  if(!state.projectType){
+    showInlineAlert('يرجى إنشاء عرض السعر أولاً','Please build a quote first.');
+    return;
+  }
+  const q = calcQuote();
+  const existing = document.getElementById('negotiateModal');
+  if(existing) existing.remove();
+  const ar = currentLang === 'ar';
+  const modal = document.createElement('div');
+  modal.id = 'negotiateModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:3000;display:flex;align-items:center;justify-content:center;padding:20px;';
+  modal.innerHTML = `
+    <div style="background:var(--dark2);border:1px solid var(--border2);max-width:460px;width:100%;direction:${ar?'rtl':'ltr'};">
+      <div style="padding:24px 24px 8px;text-align:center;border-bottom:1px solid var(--border);">
+        <div style="font-size:32px;margin-bottom:8px;">🤝</div>
+        <div style="font-family:'Playfair Display',serif;font-size:19px;font-weight:700;color:var(--gold);margin-bottom:6px;">${ar?'تفاوض على السعر':'Negotiate the Price'}</div>
+        <div style="font-size:12px;color:var(--text3);line-height:1.7;">${ar?'كل عروضنا قابلة للتفاوض. أخبرنا بميزانيتك أو السعر الذي تراه مناسباً، وسنحاول الوصول لحل يناسب الطرفين.':'All our offers are negotiable. Tell us your budget or the price you find fair, and we will try to meet in the middle.'}</div>
+      </div>
+      <div style="padding:20px 24px;display:flex;flex-direction:column;gap:14px;">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text2);background:var(--dark);padding:10px 12px;border:1px solid var(--border);">
+          <span>${ar?'العرض الحالي':'Current Offer'}</span>
+          <span style="color:var(--gold);font-weight:700;font-family:'Playfair Display',serif;">${q.total} ${state.currency||"JOD"}</span>
+        </div>
+        <div>
+          <label style="display:block;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:6px;">${ar?'السعر / الميزانية المقترحة (دينار)':'Your Proposed Price / Budget (JD)'}</label>
+          <input type="number" id="negotiatePrice" min="0" placeholder="${ar?'مثال: 1500':'e.g. 1500'}" style="width:100%;padding:11px 12px;background:var(--dark);border:1px solid var(--border2);color:var(--text);font-size:14px;font-family:inherit;">
+        </div>
+        <div>
+          <label style="display:block;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:6px;">${ar?'ملاحظة (اختياري)':'Note (optional)'}</label>
+          <textarea id="negotiateNote" rows="3" placeholder="${ar?'أي تفاصيل تساعدنا على تلبية ميزانيتك...':'Any details that help us match your budget...'}" style="width:100%;padding:11px 12px;background:var(--dark);border:1px solid var(--border2);color:var(--text);font-size:13px;font-family:inherit;resize:vertical;"></textarea>
+        </div>
+      </div>
+      <div style="display:flex;border-top:1px solid var(--border);">
+        <button onclick="document.getElementById('negotiateModal').remove()" style="flex:1;padding:14px;font-size:13px;font-weight:600;cursor:pointer;background:transparent;border:none;border-inline-end:1px solid var(--border);color:var(--text2);">${ar?'إلغاء':'Cancel'}</button>
+        <button onclick="sendNegotiation()" style="flex:1.4;padding:14px;font-size:13px;font-weight:700;cursor:pointer;background:var(--gold);color:#0c0d0f;border:none;letter-spacing:0.5px;text-transform:uppercase;">${ar?'إرسال التفاوض':'Send Negotiation'}</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  setTimeout(()=>document.getElementById('negotiatePrice')?.focus(),50);
+}
+
+function sendNegotiation(){
+  const priceEl = document.getElementById('negotiatePrice');
+  const noteEl = document.getElementById('negotiateNote');
+  const proposed = parseFloat(priceEl?.value || '0');
+  const note = (noteEl?.value || '').trim();
+  if(!proposed || proposed <= 0){
+    priceEl?.focus();
+    priceEl.style.borderColor = '#e74c3c';
+    return;
+  }
+  const q = calcQuote();
+  const type = PROJECT_TYPES.find(t=>t.id===state.projectType);
+  const diff = q.total - proposed;
+  const pct = q.total > 0 ? Math.round((diff/q.total)*100) : 0;
+
+  let msg = `*Faii House — Price Negotiation 🤝*\n`;
+  msg += `━━━━━━━━━━━━━━━━━━━━\n`;
+  if(state.clientName) msg += `*Client:* ${state.clientName}${state.clientCompany?' — '+state.clientCompany:''}\n`;
+  msg += `*Project:* ${state.projectTitle || type.name}\n`;
+  msg += `*Shooting Days:* ${state.days}\n`;
+  msg += `━━━━━━━━━━━━━━━━━━━━\n`;
+  msg += `💰 *Our Offer:* ${q.total} ${state.currency||"JOD"}\n`;
+  msg += `🤝 *Client Proposal:* ${proposed} ${state.currency||"JOD"}\n`;
+  if(diff !== 0) msg += `📊 *Difference:* ${diff} ${state.currency||"JOD"} (${pct}%)\n`;
+  msg += `━━━━━━━━━━━━━━━━━━━━\n`;
+  if(note) msg += `📝 *Note:*\n${note}\n━━━━━━━━━━━━━━━━━━━━\n`;
+  msg += `Looking forward to reaching a deal that works for both of us.`;
+
+  const url = `https://wa.me/962799256345?text=${encodeURIComponent(msg)}`;
+  window.open(url, '_blank');
+  document.getElementById('negotiateModal')?.remove();
+}
+
+// ══════════════════════════════════════════════════════════════
+// RESET (preserves localStorage only after explicit confirmation; clears it too on reset)
+// ══════════════════════════════════════════════════════════════
+function resetAll() {
+  openResetConfirmModal();
+}
+
+function openResetConfirmModal() {
+  const existing = document.getElementById('resetConfirmModal');
+  if(existing) existing.remove();
+  const modal = document.createElement('div');
+  modal.id = 'resetConfirmModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:3000;display:flex;align-items:center;justify-content:center;padding:20px;';
+  modal.innerHTML = `
+    <div style="background:var(--dark2);border:1px solid var(--border2);max-width:380px;width:100%;">
+      <div style="padding:28px 24px;text-align:center;">
+        <div style="font-size:30px;margin-bottom:12px;">🗑️</div>
+        <div style="font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--text);margin-bottom:8px;">${L('إعادة تعيين كل شيء؟','Reset Everything?')}</div>
+        <div style="font-size:12px;color:var(--text3);line-height:1.7;">${L('سيتم حذف جميع البيانات المحفوظة تلقائياً. لا يمكن التراجع عن هذا الإجراء.','All auto-saved data will be cleared. This action cannot be undone.')}</div>
+      </div>
+      <div style="display:flex;border-top:1px solid var(--border);">
+        <button onclick="document.getElementById('resetConfirmModal').remove()"
+          style="flex:1;padding:14px;font-size:13px;font-weight:600;cursor:pointer;background:transparent;border:none;border-inline-end:1px solid var(--border);color:var(--text2);">
+          ${L('إلغاء','Cancel')}
+        </button>
+        <button onclick="doReset()"
+          style="flex:1;padding:14px;font-size:13px;font-weight:700;cursor:pointer;background:var(--red);color:#fff;border:none;">
+          ${L('نعم، إعادة تعيين','Yes, Reset')}
+        </button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e=>{ if(e.target===modal) modal.remove(); });
+}
+
+function doReset() {
+  document.getElementById('resetConfirmModal')?.remove();
+  try { localStorage.removeItem(LS_KEY); } catch(e){}
+  state = DEFAULT_STATE();
+  const el = (id) => document.getElementById(id);
+  if(el('quoteDate')) el('quoteDate').value = state.quoteDate;
+  if(el('preparedBy')) el('preparedBy').value = 'Ahmad Haddad';
+  if(el('deliveryDays')) el('deliveryDays').value = '14';
+  ['clientName','clientCompany','projectTitle','projectNotes','customEquip','customTravel']
+    .forEach(id=>{ const e=el(id); if(e) e.value=''; });
+  if(el('reelWrap')) el('reelWrap').style.display='none';
+  if(el('reelCount')) el('reelCount').textContent='1';
+  if(el('reelRate')) el('reelRate').value=150;
+  if(el('daysDisplay')) el('daysDisplay').textContent='1';
+  if(el('discountBar')) el('discountBar').classList.remove('show');
+  if(el('packNotice')) el('packNotice').classList.remove('show');
+  if(el('customTravelWrap')) el('customTravelWrap').style.display='none';
+  renderTypeGrid();
+  renderCrewTable();
+  renderEquipGrid();
+  renderPostOptions();
+  renderRegionGrid();
+  goStep(1);
+  el('sbBody').innerHTML=`<div class="sb-empty"><span class="sb-empty-icon">🎬</span><p class="ar-only">اختر نوع المشروع لبدء بناء عرض السعر</p><p class="en-only">Select a project type to start</p></div>`;
+  el('mobileTotal').textContent='0 ' + (state.currency||'JOD');
+}
+</script>
+
+<!-- ══ ONBOARDING WALKTHROUGH (client-facing only) ══ -->
+<script>
+(function(){
+  const TOUR_LS = 'faii_qb_tour_v1';
+  let tourIdx = 0, tourEls = null;
+
+  const STEPS = [
+    { sel:'.step-nav',
+      ar:{t:'٦ خطوات فقط', d:'تنقّل بين الخطوات من هنا. كل خطوة تسألك سؤالًا واحدًا بسيطًا، ويمكنك الرجوع في أي وقت.'},
+      en:{t:'Just 6 steps', d:'Navigate the steps from here. Each step asks one simple question, and you can go back anytime.'} },
+    { sel:'#typeGrid',
+      ar:{t:'ابدأ بنوع المشروع', d:'اختر نوع مشروعك، وسنحمّل لك الطاقم والأسعار المقترحة تلقائيًا — يمكنك تعديلها لاحقًا.'},
+      en:{t:'Start with project type', d:'Pick your project type and we auto-load a suggested crew and rates — editable later.'} },
+    { sel:'.sidebar .sb-header, .mobile-quote-bar',
+      ar:{t:'العرض يتكوّن أمامك', d:'السعر يتحدّث لحظيًا مع كل اختيار، فتعرف تكلفة كل عنصر قبل أن تكمل.'},
+      en:{t:'Your quote builds live', d:'The price updates instantly with every choice, so you see the cost of each item as you go.'} },
+    { sel:'.btn-negotiate',
+      ar:{t:'السعر قابل للتفاوض', d:'لو كانت ميزانيتك مختلفة، اضغط هنا واقترح السعر الذي يناسبك وسنحاول الوصول لحل مشترك.'},
+      en:{t:'The price is negotiable', d:'If your budget differs, tap here and propose your price — we will try to meet in the middle.'} },
+    { sel:'#btnGenerate',
+      ar:{t:'وأخيرًا: أنشئ العرض', d:'اضغط هنا للحصول على عرض سعر جاهز للطباعة أو الإرسال عبر واتساب. عملك محفوظ تلقائيًا.'},
+      en:{t:'Finally: generate the offer', d:'Tap here for a printable offer or send it via WhatsApp. Your work is saved automatically.'} }
+  ];
+
+  function isAr(){ return document.documentElement.getAttribute('dir') !== 'ltr' && (window.currentLang ? window.currentLang === 'ar' : true); }
+
+  function build(){
+    const bd = document.createElement('div'); bd.className='tour-backdrop'; bd.id='tourBackdrop';
+    const ring = document.createElement('div'); ring.className='tour-ring'; ring.id='tourRing';
+    const card = document.createElement('div'); card.className='tour-card'; card.id='tourCard';
+    document.body.append(bd, ring, card);
+    bd.addEventListener('click', endTour);
+    requestAnimationFrame(()=>bd.classList.add('show'));
+    return {bd, ring, card};
+  }
+
+  function target(step){
+    for(const sel of step.sel.split(',')){
+      const el = document.querySelector(sel.trim());
+      if(el && el.getBoundingClientRect().width > 0) return el;
+    }
+    return null;
+  }
+
+  function render(){
+    const step = STEPS[tourIdx];
+    const el = target(step);
+    if(!el){ tourIdx++; return tourIdx < STEPS.length ? render() : endTour(); }
+    el.scrollIntoView({block:'nearest', behavior:'smooth'});
+    const r = el.getBoundingClientRect();
+    const pad = 8;
+    const {ring, card} = tourEls;
+    ring.style.top = (r.top-pad)+'px';
+    ring.style.left = (r.left-pad)+'px';
+    ring.style.width = (r.width+pad*2)+'px';
+    ring.style.height = (r.height+pad*2)+'px';
+
+    const ar = isAr();
+    const c = ar ? step.ar : step.en;
+    card.innerHTML =
+      '<div class="tour-step">'+(ar?'خطوة ':'STEP ')+(tourIdx+1)+' / '+STEPS.length+'</div>'+
+      '<div class="tour-title">'+c.t+'</div>'+
+      '<div class="tour-text">'+c.d+'</div>'+
+      '<div class="tour-actions">'+
+        '<button class="tour-skip" type="button" data-tour="skip">'+(ar?'تخطّي':'Skip')+'</button>'+
+        '<div class="tour-dots">'+STEPS.map((_,i)=>'<i class="'+(i===tourIdx?'on':'')+'"></i>').join('')+'</div>'+
+        '<button class="tour-next" type="button" data-tour="next">'+(tourIdx===STEPS.length-1?(ar?'يلا نبدأ':'Let\u2019s start'):(ar?'التالي':'Next'))+'</button>'+
+      '</div>';
+    card.querySelector('[data-tour=skip]').onclick = endTour;
+    card.querySelector('[data-tour=next]').onclick = next;
+
+    const cw = card.offsetWidth || 320, ch = card.offsetHeight || 190;
+    let top = r.bottom + 14;
+    if(top + ch > window.innerHeight - 12) top = Math.max(12, r.top - ch - 14);
+    let left = r.left + r.width/2 - cw/2;
+    left = Math.min(Math.max(12, left), window.innerWidth - cw - 12);
+    card.style.top = top+'px';
+    card.style.left = left+'px';
+  }
+
+  function next(){ tourIdx++; tourIdx >= STEPS.length ? endTour() : render(); }
+
+  function endTour(){
+    if(!tourEls) return;
+    try{ localStorage.setItem(TOUR_LS,'1'); }catch(e){}
+    tourEls.bd.remove(); tourEls.ring.remove(); tourEls.card.remove();
+    tourEls = null;
+    window.removeEventListener('resize', render);
+  }
+
+  window.startTour = function(force){
+    if(tourEls) return;
+    if(!force){
+      try{ if(localStorage.getItem(TOUR_LS)==='1') return; }catch(e){ return; }
+    }
+    tourIdx = 0;
+    tourEls = build();
+    window.addEventListener('resize', render);
+    render();
+  };
+
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape') endTour(); });
+  window.addEventListener('load', ()=>{ setTimeout(()=>window.startTour(false), 900); });
+})();
+
+// Mobile Hint Touch Support
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.hint').forEach(h => {
+    h.addEventListener('click', (e) => {
+      e.stopPropagation();
+      document.querySelectorAll('.hint.active').forEach(other => {
+        if(other !== h) other.classList.remove('active');
+      });
+      h.classList.toggle('active');
+    });
+  });
+  document.addEventListener('click', () => {
+    document.querySelectorAll('.hint.active').forEach(h => h.classList.remove('active'));
+  });
+});
+</script>
+
+
+<style>
+
+.owner-only { display: none; }
+.owner-mode .owner-only { display: flex; align-items:center; gap:5px; margin-right:10px; }
+.owner-mode .post-price { display: flex; flex-direction: column; align-items: flex-end; gap:5px; }
+.post-qty-box { display:flex; align-items:center; background:var(--surface); border:1px solid var(--border); border-radius:6px; overflow:hidden; }
+.post-qty-box button { background:transparent; border:none; color:var(--text); padding:4px 8px; cursor:pointer; font-weight:bold; }
+.post-qty-box button:hover { background:var(--gold-dim); color:var(--gold); }
+.post-qty-box span { font-size:11px; min-width:20px; text-align:center; font-weight:600; }
+.post-rate-input { width: 50px; background:var(--surface); border:1px solid var(--border); color:var(--text); font-size:11px; padding:4px; border-radius:4px; text-align:center; }
+
+/* 1. Badges & Ticker */
+.badge-popular { position:absolute; top:0; right:0; background:var(--gold); color:#000; font-size:10px; padding:4px 10px; border-radius:0 10px 0 10px; font-weight:bold; box-shadow:-2px 2px 10px rgba(0,0,0,0.1); z-index:10; pointer-events:none; }
+
+
+/* 2. Micro-interactions */
+.form-group:focus-within label { color: var(--primary); transform: translateX(4px); transition:0.3s; }
+.sidebar { overscroll-behavior: contain; }
+.tilt-card { transition: transform 0.1s ease-out, box-shadow 0.1s ease-out; transform-style: preserve-3d; }
+.ghost-pdf { position:absolute; right:20px; top:20px; width:40px; height:50px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:4px; opacity:0.5; transition:0.3s; pointer-events:none; }
+.ghost-pdf::after { content:''; position:absolute; inset:4px; background:linear-gradient(to bottom, rgba(255,255,255,0.1) 2px, transparent 2px) 0 0/100% 6px; }
+
+/* 3. Gold Dust */
+.gold-dust { position:absolute; width:4px; height:4px; background:var(--gold); border-radius:50%; pointer-events:none; animation:dustFall 1s ease-out forwards; }
+@keyframes dustFall { 0% { transform:translateY(0) scale(1); opacity:1; } 100% { transform:translateY(20px) scale(0); opacity:0; } }
+</style>
+
+<script>
+// 1. Audio System
+let audioCtx = null;
+function initAudio() { if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+function playTick() {
+  try {
+    if(!audioCtx) return;
+    const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.type = 'sine'; osc.frequency.setValueAtTime(800, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.05);
+    gain.gain.setValueAtTime(0.05, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+    osc.start(audioCtx.currentTime); osc.stop(audioCtx.currentTime + 0.05);
+  } catch(e){}
+}
+function playSuccess() {
+  try {
+    if(!audioCtx) return;
+    const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.type = 'triangle'; osc.frequency.setValueAtTime(400, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.2);
+    gain.gain.setValueAtTime(0.1, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+    osc.start(audioCtx.currentTime); osc.stop(audioCtx.currentTime + 0.3);
+  } catch(e){}
+}
+
+// 2. Odometer
+function animateValue(obj, start, end, duration) {
+  if(!obj) return;
+  let startTimestamp = null;
+  const step = (timestamp) => {
+    if (!startTimestamp) startTimestamp = timestamp;
+    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+    const val = Math.floor(progress * (end - start) + start);
+    obj.innerHTML = val + ' ' + (state.currency||'JOD');
+    if (progress < 1) { window.requestAnimationFrame(step); }
+    else { obj.innerHTML = end + ' ' + (state.currency||'JOD'); }
+  };
+  window.requestAnimationFrame(step);
+}
+
+// Intercept existing functions
+const originalGoStep = window.goStep;
+window.goStep = function(n) {
+  if(navigator.vibrate) navigator.vibrate(20);
+  playTick();
+  if(originalGoStep) originalGoStep(n);
+};
+
+const originalSetDelivery = window.setDelivery;
+window.setDelivery = function(val) {
+  if(navigator.vibrate) navigator.vibrate(20);
+  playTick();
+  if(originalSetDelivery) originalSetDelivery(val);
+};
+
+const originalUpdateQuote = window.updateQuote;
+window.updateQuote = function() {
+  if(originalUpdateQuote) originalUpdateQuote();
+  setTimeout(() => {
+    // Odometer
+    const mt = document.getElementById('totalPrice');
+    const mobT = document.getElementById('mobileTotal');
+    const targetTotal = typeof calcQuote === 'function' ? calcQuote().total : 0;
+    const discountAmt = typeof calcQuote === 'function' ? calcQuote().discountAmt : 0;
+    
+    if(mt && parseInt(mt.textContent) !== targetTotal) animateValue(mt, parseInt(mt.textContent)||0, targetTotal, 400);
+    if(mobT && parseInt(mobT.textContent) !== targetTotal) animateValue(mobT, parseInt(mobT.textContent)||0, targetTotal, 400);
+
+    // Savings Ticker
+    
+    const mobSav = document.getElementById('mobileSavings');
+    if(mobSav) {
+      if(discountAmt > 0) {
+        mobSav.innerHTML = '✦وفرت ' + discountAmt + ' ' + (state.currency||'JOD');
+        mobSav.style.opacity = '1';
+      } else {
+        mobSav.style.opacity = '0';
+      }
+    }
+
+  }, 50);
+};
+
+// 3. DOM Ready Injections
+document.addEventListener('DOMContentLoaded', () => {
+  document.body.addEventListener('click', initAudio, {once:true});
+
+  // Inject Ticker
+  
+
+  // Time hint
+  const sec1 = document.getElementById('sec-1');
+  if(sec1) {
+    const p = sec1.querySelector('.section-head');
+    if(p) p.insertAdjacentHTML('beforeend', '<p style="font-size:11px; color:var(--primary); margin-top:-4px; margin-bottom:12px;" class="ar-only">⏱ يستغرق هذا النموذج دقيقتين فقط.. نحن نحسب كل شيء عنك</p>');
+  }
+
+  // Magnetic Button
+  const btn = document.getElementById('btnGenerate');
+  if(btn) {
+    btn.addEventListener('mousemove', (e) => {
+      const rect = btn.getBoundingClientRect();
+      const x = e.clientX - rect.left - rect.width / 2;
+      const y = e.clientY - rect.top - rect.height / 2;
+      btn.style.transform = `translate(${x * 0.15}px, ${y * 0.15}px)`;
+    });
+    btn.addEventListener('mouseleave', () => btn.style.transform = '');
+  }
+
+  // Apply Badges periodically because cards are re-rendered
+  setInterval(() => {
+    document.querySelectorAll('.type-name').forEach(el => {
+      if(el.textContent.includes('إعلان تجاري') && !el.parentNode.querySelector('.badge-popular')) {
+        el.parentNode.style.position = 'relative';
+        el.parentNode.insertAdjacentHTML('beforeend', '<div class="badge-popular">🔥 الأكثر طلباً</div>');
+      }
+    });
+    document.querySelectorAll('.equip-card').forEach(el => {
+      if(el.textContent.includes('Advanced') && !el.querySelector('.badge-popular')) {
+        el.style.position = 'relative';
+        el.insertAdjacentHTML('beforeend', '<div class="badge-popular">🔥 الأكثر طلباً</div>');
+      }
+    });
+    // 3D Tilt
+    document.querySelectorAll('.type-card:not(.tilted), .equip-card:not(.tilted)').forEach(card => {
+      card.classList.add('tilted');
+      card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left; const y = e.clientY - rect.top;
+        const centerX = rect.width / 2; const centerY = rect.height / 2;
+        card.style.transform = `perspective(1000px) rotateX(${((y - centerY)/centerY)*-5}deg) rotateY(${((x - centerX)/centerX)*5}deg) translateY(-3px)`;
+      });
+      card.addEventListener('mouseleave', () => card.style.transform = '');
+    });
+  }, 1000);
+
+  // Sound on Success
+  const originalShowPreview = window.showPreview;
+  window.showPreview = function() {
+    if(originalShowPreview) originalShowPreview();
+    playSuccess();
+    
+    // Setup Gold Dust hover on total price in modal
+    setTimeout(() => {
+      const qTotal = document.querySelector('.q-sub-new');
+      if(qTotal) {
+        qTotal.addEventListener('mousemove', (e) => {
+          if(Math.random() > 0.2) return;
+          const dust = document.createElement('div');
+          dust.className = 'gold-dust';
+          dust.style.left = e.clientX + 'px';
+          dust.style.top = e.clientY + 'px';
+          document.body.appendChild(dust);
+          setTimeout(() => dust.remove(), 1000);
+        });
+      }
+    }, 1000);
+  };
+});
+</script>
+
+<style>
+/* Session Toast */
+.session-toast { position:fixed; top:20px; left:50%; transform:translateX(-50%) translateY(-100px); background:var(--primary); color:#000; font-size:12px; font-weight:bold; padding:10px 20px; border-radius:30px; box-shadow:0 10px 30px rgba(212,175,55,0.4); opacity:0; transition:0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index:10000; pointer-events:none; }
+.session-toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
+
+/* Ghost PDF */
+.ghost-pdf { position:absolute; right:20px; top:20px; width:45px; height:60px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:4px; transition:0.3s; pointer-events:none; display:none; flex-direction:column; padding:4px; gap:2px; box-shadow:0 4px 10px rgba(0,0,0,0.2); }
+@media(min-width:1024px){ .ghost-pdf { display:flex; } }
+.ghost-pdf .line { background:rgba(255,255,255,0.1); height:2px; border-radius:2px; width:100%; transition:0.3s; }
+.ghost-pdf .line.short { width:60%; }
+.ghost-pdf .line.primary { background:var(--primary); width:40%; opacity:0; }
+
+/* SVG Checkbox replacement for Post-production */
+.post-option input[type="checkbox"] { appearance:none; -webkit-appearance:none; width:20px; height:20px; border:1px solid var(--border); border-radius:4px; margin-inline-end:10px; cursor:pointer; position:relative; outline:none; transition:0.2s; flex-shrink:0; }
+.post-option input[type="checkbox"]:checked { background:rgba(212,175,55,0.1); border-color:var(--primary); }
+.post-option input[type="checkbox"]::after { content:''; position:absolute; left:6px; top:2px; width:6px; height:11px; border:solid var(--primary); border-width:0 2px 2px 0; transform:rotate(45deg) scale(0); transition:transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity:0; }
+.post-option input[type="checkbox"]:checked::after { transform:rotate(45deg) scale(1); opacity:1; }
+
+/* Contextual Documentary Hint */
+.doc-hint { font-size:11px; color:var(--primary); background:rgba(212,175,55,0.1); padding:8px 12px; border-radius:6px; margin-top:10px; display:none; animation:fadeIn 0.3s ease; border: 1px solid var(--gold-b); }
+.doc-hint.show { display:block; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(-5px);} to{opacity:1;transform:translateY(0);} }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // 1. Session Toast
+  if(localStorage.getItem('faiihouse_quote_state')) {
+    const toastHtml = '<div id="sessionToast" class="session-toast">✨ استعدنا بياناتك السابقة لتوفير وقتك</div>';
+    document.body.insertAdjacentHTML('beforeend', toastHtml);
+    setTimeout(() => { document.getElementById('sessionToast')?.classList.add('show'); }, 500);
+    setTimeout(() => { document.getElementById('sessionToast')?.classList.remove('show'); }, 4000);
+  }
+
+  // 2. Ghost PDF in Sidebar
+  const sidebarHeader = document.querySelector('.sidebar .sb-header');
+  if(sidebarHeader) {
+    sidebarHeader.style.position = 'relative';
+    sidebarHeader.insertAdjacentHTML('beforeend', `
+      <div id="ghostPdf" class="ghost-pdf">
+        <div class="line primary" id="g-title"></div>
+        <div class="line"></div>
+        <div class="line short"></div>
+        <div style="flex:1"></div>
+        <div class="line"></div>
+        <div class="line"></div>
+      </div>
+    `);
+  }
+
+  // 3. Documentary Hint Setup
+  const sec5 = document.getElementById('sec-5');
+  if(sec5) {
+    const p = sec5.querySelector('.section-head');
+    if(p) p.insertAdjacentHTML('beforeend', '<div id="docHint" class="doc-hint">💡 <strong>نصيحة للمخرجات الوثائقية:</strong> الأفلام الوثائقية غالباً ما تحتاج لخدمة <strong>تصحيح الألوان (Color Grading)</strong> الاحترافية لإعطاء الطابع السينمائي، هل ندرجها لك؟</div>');
+  }
+
+  // 4. Hook into updateQuote for Ghost PDF and Doc Hint
+  const originalUpdate2 = window.updateQuote;
+  window.updateQuote = function() {
+    if(originalUpdate2) originalUpdate2();
+    setTimeout(() => {
+      // Documentary Hint
+      const docHint = document.getElementById('docHint');
+      if(docHint && typeof state !== 'undefined') {
+        if(state.projectType === 'documentary') docHint.classList.add('show');
+        else docHint.classList.remove('show');
+      }
+
+      // Ghost PDF Fill
+      const gTitle = document.getElementById('g-title');
+      if(gTitle && typeof state !== 'undefined') {
+        if(state.clientName || state.projectType) {
+          gTitle.style.opacity = '1';
+          gTitle.style.width = '80%';
+        }
+      }
+    }, 100);
+  };
+
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    if(typeof state !== 'undefined') {
+      if(!state.currency) state.currency = 'JOD';
+      if(!state.paymentTerms) state.paymentTerms = '50_50';
+      const cSel = document.getElementById('ownerCurrency');
+      const pSel = document.getElementById('ownerPayment');
+      if(cSel) cSel.value = state.currency;
+      if(pSel) pSel.value = state.paymentTerms;
+      const dModeSel = document.getElementById('ownerDiscountMode');
+      const dValInp = document.getElementById('ownerDiscountVal');
+      if(dModeSel && state.discountMode) {
+        dModeSel.value = state.discountMode;
+        if(state.discountMode === 'custom_pct' || state.discountMode === 'custom_amt') {
+          dValInp.style.display = 'block';
+          dValInp.value = state.discountVal || '';
+        }
+      }
+    }
+  }, 500);
+});
+
+// Intercept string renders
+const originalL = window.L;
+window.L = function(ar, en) {
+  if(!originalL) return ar;
+  let res = originalL(ar, en);
+  if(typeof state !== 'undefined' && state.currency && state.currency !== 'JOD') {
+     res = res.replace(/JD/g, state.currency);
+  }
+  return res;
+};
+
+// --- Masterclass UX Scripts ---
+function spawnCostGhost(e, text, isTextOnly = false) {
+  if(!e) return;
+  let clientX, clientY;
+  if(e.touches && e.touches.length > 0) {
+    clientX = e.touches[0].clientX; clientY = e.touches[0].clientY;
+  } else {
+    clientX = e.clientX; clientY = e.clientY;
+  }
+  const ghost = document.createElement('div');
+  ghost.className = 'cost-ghost' + (text.toString().includes('-') ? ' negative' : '');
+  ghost.textContent = text;
+  ghost.style.left = clientX + 'px';
+  ghost.style.top = clientY + 'px';
+  document.body.appendChild(ghost);
+  setTimeout(() => ghost.remove(), 800);
+}
+
+document.addEventListener('click', function(e) {
+  const target = e.target.closest('.pt-card, .equip-card, .post-option, .role-info-td, button.btn-primary');
+  if(!target || e.target.tagName === 'INPUT') return;
+  const rect = target.getBoundingClientRect();
+  const circle = document.createElement('span');
+  const diameter = Math.max(rect.width, rect.height);
+  circle.style.width = circle.style.height = diameter + 'px';
+  circle.style.left = (e.clientX - rect.left - diameter/2) + 'px';
+  circle.style.top = (e.clientY - rect.top - diameter/2) + 'px';
+  circle.classList.add('ripple');
+  
+  const compStyle = window.getComputedStyle(target);
+  if(compStyle.position === 'static') target.style.position = 'relative';
+  if(compStyle.overflow !== 'hidden' && !target.classList.contains('role-info-td')) target.style.overflow = 'hidden';
+  
+  target.appendChild(circle);
+  setTimeout(() => circle.remove(), 600);
+});
+
+let longPressTimer;
+function handleDown(e) {
+  const btn = e.target.closest('button');
+  if(!btn || btn.textContent.trim() !== '−') return;
+  
+  let clientX, clientY;
+  if(e.touches && e.touches.length > 0) {
+    clientX = e.touches[0].clientX; clientY = e.touches[0].clientY;
+  } else {
+    clientX = e.clientX; clientY = e.clientY;
+  }
+  
+  const onclick = btn.getAttribute('onclick') || '';
+  let idMatch = onclick.match(/setQty\('([^']+)',\s*-1/);
+  
+  longPressTimer = setTimeout(() => {
+    if(idMatch) {
+      toggleRole(idMatch[1], false);
+      const ghost = document.createElement('div');
+      ghost.className = 'cost-ghost negative'; ghost.textContent = L('تم المسح', 'Cleared');
+      ghost.style.left = clientX+'px'; ghost.style.top = clientY+'px';
+      document.body.appendChild(ghost);
+      setTimeout(()=>ghost.remove(), 800);
+      if(navigator.vibrate) navigator.vibrate(50);
+    }
+  }, 600);
+}
+function handleUp() { clearTimeout(longPressTimer); }
+document.addEventListener('mousedown', handleDown);
+document.addEventListener('mouseup', handleUp);
+document.addEventListener('touchstart', handleDown, {passive:true});
+document.addEventListener('touchend', handleUp);
+// ------------------------------
+
+// ══════════════════════════════════════════════════════════════
+// PHASE 1: CORE UX ENGINE (GSAP, LENIS, HAPTICS, BATTERY)
+// ══════════════════════════════════════════════════════════════
+
+// 1. Dynamic Viewport Fix
+const setVh = () => { document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`); };
+window.addEventListener('resize', setVh);
+window.addEventListener('orientationchange', setVh);
+setVh();
+
+// 2. Battery Saver & Reduced Motion Detection
+window.isBatterySaver = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+if (navigator.getBattery) {
+  navigator.getBattery().then(batt => {
+    if (batt.level <= 0.2 && !batt.charging) window.isBatterySaver = true;
+  });
+}
+
+// 3. Lenis & GSAP Setup
+let lenis;
+if (!window.isBatterySaver && typeof Lenis !== 'undefined' && typeof gsap !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger);
+  lenis = new Lenis({
+    duration: 1.2,
+    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+    smoothTouch: false, // Native touch scrolling for mobile, but syncs with ScrollTrigger
+  });
+  lenis.on('scroll', ScrollTrigger.update);
+  gsap.ticker.add((time) => { lenis.raf(time * 1000) });
+  gsap.ticker.lagSmoothing(0);
+}
+
+// 4. Mobile Haptic Feedback
+window.hapticPulse = function(type = 'light') {
+  if (window.isBatterySaver || !navigator.vibrate) return;
+  try {
+    if (type === 'light') navigator.vibrate(15);
+    else if (type === 'medium') navigator.vibrate(30);
+    else if (type === 'heavy') navigator.vibrate([30, 50, 30]);
+  } catch(e) {}
+};
+
+// 5. Page Transition "Press Play"
+window.addEventListener('load', () => {
+  const overlay = document.getElementById('page-transition-overlay');
+  if (overlay) {
+    if (!window.isBatterySaver && typeof gsap !== 'undefined') {
+      gsap.to(overlay, {opacity: 0, duration: 1.2, ease: 'power2.inOut', onComplete: () => overlay.style.display = 'none'});
+    } else {
+      overlay.style.display = 'none';
+    }
+  }
+});
+</script>
+</body>
+</html>
