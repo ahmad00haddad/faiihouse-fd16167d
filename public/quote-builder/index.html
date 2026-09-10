@@ -1624,7 +1624,6 @@ const CREW_PRESETS = {
 };
 
 function selectType(id) {
-  const changed = state.projectType !== id;
   state.projectType = id;
   const type = PROJECT_TYPES.find(t=>t.id===id);
 
