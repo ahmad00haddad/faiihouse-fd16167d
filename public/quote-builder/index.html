@@ -1610,24 +1610,35 @@ function renderTypeGrid() {
     </div>`).join('');
 }
 
+// Per-type default crew (roleId -> qty). Each type is fully independent.
+const CREW_PRESETS = {
+  reels:       {cinematographer:1},
+  interview:   {cinematographer:2, sound:1},
+  corporate:   {director:1, cinematographer:1, producer:1, cam_assistant:1},
+  commercial:  {director:1, cinematographer:1, producer:1, cam_assistant:1, gaffer:1, art_director:1},
+  documentary: {director:1, cinematographer:1, sound:1, location_scout:1},
+  shortfilm:   {director:1, cinematographer:1, producer:1, cam_assistant:1, gaffer:1, sound:1, main_actor:1},
+  event:       {cinematographer:2, photographer:1},
+  photovideo:  {cinematographer:1, photographer:1, art_director:1},
+  realestate:  {cinematographer:1, photographer:1},
+};
+
 function selectType(id) {
   state.projectType = id;
   const type = PROJECT_TYPES.find(t=>t.id===id);
 
-  // Set default crew
+  // Drop any custom roles added for the previous type so nothing carries over
+  for(let i=ROLES.length-1;i>=0;i--){ if(String(ROLES[i].id).startsWith('custom_')) ROLES.splice(i,1); }
+
+  // Rebuild crew from scratch for this type only
+  const preset = CREW_PRESETS[id] || {};
+  const fresh = {};
   ROLES.forEach(r=>{
-    let enabled = false;
-    let qty = 1;
-    if(id==='reels') {
-      enabled = r.id==='cinematographer';
-    } else if(id==='interview') {
-      if(r.id==='cinematographer') { enabled=true; qty=2; }
-      else if(r.id==='sound') { enabled=true; }
-    } else {
-      enabled = type.crew && type.crew.includes(r.id);
-    }
-    state.crew[r.id] = {enabled, rate:r.rate, qty};
+    const q = preset[r.id];
+    fresh[r.id] = {enabled: !!q, rate: r.rate, qty: q || 1};
   });
+  state.crew = fresh;
+
 
   // Set default equipment
   if(type.defaultEquip) {
