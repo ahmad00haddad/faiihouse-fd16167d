@@ -480,20 +480,6 @@ function ListEditor<T extends Record<string, string>>({
         <p className="text-xs text-muted-foreground">اسحب من المقبض <GripVertical size={12} className="inline" /> لإعادة الترتيب، ثم اضغط "حفظ" أعلى الصفحة.</p>
       </div>
       
-      <button type="button" onClick={() => {
-        const behanceImports = [
-          { title: "Em Sherif Cafe Amman", category: "film", image: "https://mir-s3-cdn-cf.behance.net/projects/max_808/01ae1b206884241.Y3JvcCw4NjIsNjc1LDEzOCww.png", behance: "https://www.behance.net/gallery/206884241/Em-Sherif-Cafe-Amman" },
-          { title: "حملة إعلامية - QRTA", category: "ads", image: "https://mir-s3-cdn-cf.behance.net/projects/max_808/5ffbbe248817069.Y3JvcCw4NjIsNjc1LDE5MCww.jpg", behance: "https://www.behance.net/gallery/248817069/-QRTA" },
-          { title: "وثائقي", category: "documentary", image: "https://mir-s3-cdn-cf.behance.net/projects/max_808/6e8bb7240973859.Y3JvcCwyMTYwLDE2ODksMCw5NDA.png", behance: "https://www.behance.net/gallery/240973859/_" }
-        ];
-        setItems([...(behanceImports as any), ...items]); 
-        setVisibleCount(v => v + 3); 
-        alert("تمت الإضافة للقائمة! لا تنسَ الضغط على زر الحفظ أعلى الصفحة لتأكيد التغييرات.");
-      }}
-        className="w-full bg-primary/20 border border-dashed border-primary rounded-xl py-4 mb-2 text-primary hover:bg-primary/30 inline-flex items-center justify-center gap-2 font-bold">
-        <Plus size={16} /> استيراد المشاريع الثلاثة من بيهانس (زر مؤقت)
-      </button>
-
       <button onClick={() => { setItems([{ ...blank }, ...items]); setVisibleCount(v => v + 1); }}
         className="w-full border border-dashed border-border rounded-xl py-4 mb-2 text-muted-foreground hover:text-primary hover:border-primary inline-flex items-center justify-center gap-2">
         <Plus size={16} /> إضافة عنصر
