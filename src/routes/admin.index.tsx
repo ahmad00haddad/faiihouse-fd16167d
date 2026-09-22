@@ -421,7 +421,15 @@ function ListEditor<T extends Record<string, string>>({
 
   return (
     <div className="space-y-3">
-      <p className="text-xs text-muted-foreground px-1">اسحب من المقبض <GripVertical size={12} className="inline" /> لإعادة الترتيب، ثم اضغط "حفظ" أعلى الصفحة.</p>
+      <div className="flex items-center justify-between px-1">
+        <p className="text-xs text-muted-foreground">اسحب من المقبض <GripVertical size={12} className="inline" /> لإعادة الترتيب، ثم اضغط "حفظ" أعلى الصفحة.</p>
+      </div>
+      
+      <button onClick={() => setItems([{ ...blank }, ...items])}
+        className="w-full border border-dashed border-border rounded-xl py-4 mb-2 text-muted-foreground hover:text-primary hover:border-primary inline-flex items-center justify-center gap-2">
+        <Plus size={16} /> إضافة عنصر
+      </button>
+
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
         <SortableContext items={ids} strategy={verticalListSortingStrategy}>
           {items.map((it, idx) => (
@@ -441,10 +449,6 @@ function ListEditor<T extends Record<string, string>>({
           ))}
         </SortableContext>
       </DndContext>
-      <button onClick={() => setItems([...items, { ...blank }])}
-        className="w-full border border-dashed border-border rounded-xl py-4 text-muted-foreground hover:text-primary hover:border-primary inline-flex items-center justify-center gap-2">
-        <Plus size={16} /> إضافة عنصر
-      </button>
     </div>
   );
 }
