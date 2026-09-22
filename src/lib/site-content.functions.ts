@@ -51,20 +51,21 @@ const statSchema = z.object({
 });
 
 const serviceSchema = z.object({
+  icon: z.string().optional(),
   title: z.string().max(200),
   desc: z.string().max(1000),
 });
 
 const portfolioItemSchema = z.object({
-  image: z.string().max(2000),
+  image: z.string().max(20000),
   title: z.string().max(300),
-  category: z.enum(["film", "documentary", "ads"]),
+  category: z.string().max(100),
   behance: z.string().max(500),
 });
 
 const clientSchema = z.object({
   name: z.string().max(200),
-  image: z.string().max(2000),
+  image: z.string().max(20000),
 });
 
 const siteContentSchema = z.object({
