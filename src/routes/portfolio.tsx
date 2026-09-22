@@ -56,8 +56,8 @@ function PortfolioPage() {
   const { portfolio } = useSiteContent();
   const [active, setActive] = useState<PortCategory>("all");
   const items = useMemo(() => {
-    const reversed = [...portfolio].reverse();
-    return active === "all" ? reversed : reversed.filter((p) => p.category === active);
+    const arr = [...portfolio];
+    return active === "all" ? arr : arr.filter((p) => p.category === active);
   }, [active, portfolio]);
 
   return (

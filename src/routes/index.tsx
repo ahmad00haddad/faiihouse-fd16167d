@@ -30,7 +30,7 @@ export const Route = createFileRoute("/")({
 function HomePage() {
   const content = useSiteContent();
   const { hero, stats, services, portfolio, clients, showreelUrl } = content;
-  const featured = [...portfolio].reverse().slice(0, 6);
+  const featured = [...portfolio].slice(0, 6);
 
   return (
     <div className="min-h-screen bg-background">
