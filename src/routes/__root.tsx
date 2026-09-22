@@ -137,6 +137,8 @@ function RootShell({ children }: { children: React.ReactNode }) {
   );
 }
 
+import { Toaster } from "sonner";
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
@@ -145,6 +147,7 @@ function RootComponent() {
       <MagneticCursor />
       <PageTransition />
       <Outlet />
+      <Toaster position="bottom-left" richColors dir="rtl" theme="dark" />
     </QueryClientProvider>
   );
 }

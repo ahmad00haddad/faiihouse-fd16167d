@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
+import { toast } from "sonner";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { adminVerify, adminLogout } from "@/lib/admin-auth.functions";
 import { listContactMessages, listJobApplications } from "@/lib/leads.functions";
@@ -78,17 +79,27 @@ function AdminPage() {
     setSaving(true);
     try {
       await saveContent({ data: { token, data: content } });
-      // Re-fetch from DB to confirm persistence and reflect source of truth
       const c = await fetchContent();
       setContent(mergeFromDb(c.data as Partial<SiteContent> | null));
       setSavedAt(new Date().toLocaleTimeString("ar"));
-
+      toast.success("تم الحفظ بنجاح");
     } catch (e) {
-      alert(e instanceof Error ? e.message : "فشل الحفظ");
+      toast.error(e instanceof Error ? e.message : "فشل الحفظ");
     } finally {
       setSaving(false);
     }
   };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        onSave();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [content, token]);
 
 
   const onLogout = async () => {
@@ -165,6 +176,9 @@ function LeadsPanel({ token }: { token: string | null }) {
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
 
+  const [contactCount, setContactCount] = useState(10);
+  const [jobCount, setJobCount] = useState(10);
+
   useEffect(() => {
     if (!token) return;
     (async () => {
@@ -198,10 +212,11 @@ function LeadsPanel({ token }: { token: string | null }) {
       </div>
       {loading && <div className="text-muted-foreground text-sm">جارٍ التحميل...</div>}
       {err && <div className="text-destructive text-sm">{err}</div>}
+      
       {!loading && sub === "contact" && (
         <div className="space-y-3">
           {contacts.length === 0 && <div className="text-muted-foreground text-sm">لا توجد رسائل بعد.</div>}
-          {contacts.map((r) => (
+          {contacts.slice(0, contactCount).map((r) => (
             <div key={r.id} className="bg-card/40 border border-border rounded-xl p-4 space-y-2">
               <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
                 <div className="font-medium text-foreground">{r.name}</div>
@@ -211,12 +226,18 @@ function LeadsPanel({ token }: { token: string | null }) {
               <div className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">{r.message}</div>
             </div>
           ))}
+          {contactCount < contacts.length && (
+            <button onClick={() => setContactCount(c => c + 10)} className="w-full py-3 text-sm text-primary hover:bg-primary/10 rounded-xl transition-colors border border-primary/20">
+              عرض المزيد ({contacts.length - contactCount} متبقي)
+            </button>
+          )}
         </div>
       )}
+
       {!loading && sub === "jobs" && (
         <div className="space-y-3">
           {jobs.length === 0 && <div className="text-muted-foreground text-sm">لا توجد طلبات بعد.</div>}
-          {jobs.map((r) => (
+          {jobs.slice(0, jobCount).map((r) => (
             <div key={r.id} className="bg-card/40 border border-border rounded-xl p-4 space-y-2 text-sm">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="font-medium text-foreground">{r.name}</div>
@@ -239,6 +260,11 @@ function LeadsPanel({ token }: { token: string | null }) {
               {r.edge && <div><div className="text-xs text-muted-foreground mb-1">الإضافة الخاصة</div><div className="whitespace-pre-wrap">{r.edge}</div></div>}
             </div>
           ))}
+          {jobCount < jobs.length && (
+            <button onClick={() => setJobCount(c => c + 10)} className="w-full py-3 text-sm text-primary hover:bg-primary/10 rounded-xl transition-colors border border-primary/20">
+              عرض المزيد ({jobs.length - jobCount} متبقي)
+            </button>
+          )}
         </div>
       )}
     </div>
@@ -265,7 +291,12 @@ function Field({ label, value, onChange, textarea, options }: { label: string; v
         </div>
       )}
       {isImage && value && (
-        <img src={value} alt="" className="mt-1 h-16 w-auto rounded border border-border object-cover" />
+        <div className="relative inline-block mt-2">
+          <img src={value} alt="" className="h-16 w-auto rounded border border-border object-cover bg-card" />
+          <button type="button" onClick={() => onChange("")} className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 hover:scale-110 transition-transform shadow-lg">
+            <Trash2 size={12} />
+          </button>
+        </div>
       )}
     </label>
   );
@@ -289,8 +320,9 @@ function ImageUploadButton({ onUploaded }: { onUploaded: (url: string) => void }
       });
       const res = await upload({ data: { token, filename: file.name, contentType: file.type || "image/jpeg", base64 } });
       onUploaded(res.url);
+      toast.success("تم رفع الصورة");
     } catch (e) {
-      alert(e instanceof Error ? e.message : "فشل الرفع");
+      toast.error(e instanceof Error ? e.message : "فشل الرفع");
     } finally {
       setBusy(false);
       if (inputRef.current) inputRef.current.value = "";
@@ -365,33 +397,45 @@ function SortableRow<T extends Record<string, string>>({
   onRemove: () => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  const isLikelyNew = !item[fields[0]?.k];
+  const [expanded, setExpanded] = useState(isLikelyNew);
+
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.6 : 1,
   };
+
+  const displayTitle = item.title || item.name || item.value || `عنصر #${idx + 1}`;
+
   return (
     <div ref={setNodeRef} style={style} className="bg-card/40 border border-border rounded-xl p-4 space-y-2 relative">
-      <div className="flex items-center gap-2 mb-1">
+      <div className="flex items-center gap-3">
         <button
           type="button"
           {...attributes}
           {...listeners}
           aria-label="سحب لإعادة الترتيب"
-          className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-primary p-1.5 rounded hover:bg-primary/10 touch-none"
+          className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-primary p-1.5 rounded hover:bg-primary/10 touch-none shrink-0"
         >
           <GripVertical size={16} />
         </button>
-        <span className="text-xs text-muted-foreground">#{idx + 1}</span>
+        <button onClick={() => setExpanded(!expanded)} className="flex-1 text-right font-medium text-sm text-foreground hover:text-primary py-1 truncate">
+          {displayTitle}
+        </button>
         <button onClick={onRemove}
-          className="ms-auto text-destructive/70 hover:text-destructive p-1.5 rounded hover:bg-destructive/10">
+          className="shrink-0 text-destructive/70 hover:text-destructive p-1.5 rounded hover:bg-destructive/10">
           <Trash2 size={16} />
         </button>
       </div>
-      {fields.map((f) => (
-        <Field key={f.k} label={f.l} value={String(item[f.k] ?? "")} textarea={f.textarea} options={f.options}
-          onChange={(v) => onChange(f.k, v)} />
-      ))}
+      {expanded && (
+        <div className="pt-4 space-y-3 border-t border-border mt-3">
+          {fields.map((f) => (
+            <Field key={f.k} label={f.l} value={String(item[f.k] ?? "")} textarea={f.textarea} options={f.options}
+              onChange={(v) => onChange(f.k, v)} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -408,7 +452,10 @@ function ListEditor<T extends Record<string, string>>({
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
-  const ids = items.map((_, i) => `row-${i}`);
+  
+  const [visibleCount, setVisibleCount] = useState(10);
+  const visibleItems = items.slice(0, visibleCount);
+  const ids = visibleItems.map((_, i) => `row-${i}`);
 
   const onDragEnd = (e: DragEndEvent) => {
     const { active, over } = e;
@@ -425,14 +472,14 @@ function ListEditor<T extends Record<string, string>>({
         <p className="text-xs text-muted-foreground">اسحب من المقبض <GripVertical size={12} className="inline" /> لإعادة الترتيب، ثم اضغط "حفظ" أعلى الصفحة.</p>
       </div>
       
-      <button onClick={() => setItems([{ ...blank }, ...items])}
+      <button onClick={() => { setItems([{ ...blank }, ...items]); setVisibleCount(v => v + 1); }}
         className="w-full border border-dashed border-border rounded-xl py-4 mb-2 text-muted-foreground hover:text-primary hover:border-primary inline-flex items-center justify-center gap-2">
         <Plus size={16} /> إضافة عنصر
       </button>
 
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
         <SortableContext items={ids} strategy={verticalListSortingStrategy}>
-          {items.map((it, idx) => (
+          {visibleItems.map((it, idx) => (
             <SortableRow
               key={ids[idx]}
               id={ids[idx]}
@@ -449,6 +496,12 @@ function ListEditor<T extends Record<string, string>>({
           ))}
         </SortableContext>
       </DndContext>
+      
+      {visibleCount < items.length && (
+        <button onClick={() => setVisibleCount(v => v + 10)} className="w-full py-3 text-sm text-primary hover:bg-primary/10 rounded-xl transition-colors border border-primary/20">
+          عرض المزيد ({items.length - visibleCount} متبقي)
+        </button>
+      )}
     </div>
   );
 }
