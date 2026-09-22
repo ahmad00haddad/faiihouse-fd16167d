@@ -52,12 +52,9 @@ const filters: { id: PortCategory; label: string }[] = [
   { id: "ads", label: "إعلانات" },
 ];
 
-import { useAutoAnimate } from "@formkit/auto-animate/react";
-
 function PortfolioPage() {
   const { portfolio } = useSiteContent();
   const [active, setActive] = useState<PortCategory>("all");
-  const [parent] = useAutoAnimate();
   
   const items = useMemo(() => {
     const arr = [...portfolio];
@@ -102,7 +99,7 @@ function PortfolioPage() {
 
       <section className="pb-24 px-6 lg:px-10">
         <div className="max-w-7xl mx-auto">
-          <div ref={parent} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 auto-rows-max">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 auto-rows-max">
             {items.map((p, i) => {
               const isFeatured = i % 7 === 0;
               return (
