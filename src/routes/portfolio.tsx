@@ -52,9 +52,13 @@ const filters: { id: PortCategory; label: string }[] = [
   { id: "ads", label: "إعلانات" },
 ];
 
+import { useAutoAnimate } from "@formkit/auto-animate/react";
+
 function PortfolioPage() {
   const { portfolio } = useSiteContent();
   const [active, setActive] = useState<PortCategory>("all");
+  const [parent] = useAutoAnimate();
+  
   const items = useMemo(() => {
     const arr = [...portfolio];
     return active === "all" ? arr : arr.filter((p) => p.category === active);
@@ -84,7 +88,7 @@ function PortfolioPage() {
                   onClick={() => setActive(f.id)}
                   className={`px-5 py-2.5 rounded-full text-sm border transition-all ${
                     active === f.id
-                      ? "bg-primary text-primary-foreground border-primary"
+                      ? "bg-primary text-primary-foreground border-primary shadow-glow"
                       : "border-border text-foreground/80 hover:text-primary hover:border-primary"
                   }`}
                 >
@@ -98,34 +102,37 @@ function PortfolioPage() {
 
       <section className="pb-24 px-6 lg:px-10">
         <div className="max-w-7xl mx-auto">
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {items.map((p, i) => (
-              <Reveal key={p.title + i} delay={(i % 6) * 60}>
-                <a
-                  href={p.behance ?? "https://www.behance.net/faiihouse"}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block group relative aspect-[4/5] rounded-2xl overflow-hidden bg-surface"
-                >
-                  <LazyImage
-                    src={p.image}
-                    alt={p.title}
-                    wrapperClassName="absolute inset-0"
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent opacity-90 z-[1]" />
-                  <div className="absolute top-4 left-4 z-[2] w-9 h-9 rounded-full bg-primary/90 text-primary-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 -translate-y-2 group-hover:translate-y-0 transition-all">
-                    <ExternalLink size={14} />
-                  </div>
-                  <div className="absolute bottom-0 inset-x-0 z-[2] p-5 translate-y-2 group-hover:translate-y-0 transition-transform">
-                    <div className="text-xs tracking-[0.25em] text-primary uppercase">{p.category}</div>
-                    <div className="mt-1 text-lg text-foreground">{p.title}</div>
-                  </div>
-                  <div className="absolute top-0 inset-x-0 z-[2] h-2 film-strip translate-y-[-100%] group-hover:translate-y-0 transition-transform duration-500" />
-                  <div className="absolute bottom-0 inset-x-0 z-[2] h-2 film-strip translate-y-[100%] group-hover:translate-y-0 transition-transform duration-500" />
-                </a>
-              </Reveal>
-            ))}
+          <div ref={parent} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 auto-rows-max">
+            {items.map((p, i) => {
+              const isFeatured = i % 7 === 0;
+              return (
+                <Reveal key={p.title + i} delay={(i % 8) * 40} className={isFeatured ? "sm:col-span-2 lg:col-span-2 xl:col-span-2" : "col-span-1"}>
+                  <a
+                    href={p.behance ?? "https://www.behance.net/faiihouse"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`block group relative rounded-2xl overflow-hidden bg-surface ${isFeatured ? "aspect-[4/3] sm:aspect-[16/9]" : "aspect-[4/5]"}`}
+                  >
+                    <LazyImage
+                      src={p.image}
+                      alt={p.title}
+                      wrapperClassName="absolute inset-0"
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent opacity-90 z-[1]" />
+                    <div className="absolute top-4 left-4 z-[2] w-10 h-10 rounded-full bg-primary/90 text-primary-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 -translate-y-4 group-hover:translate-y-0 transition-all shadow-glow">
+                      <ExternalLink size={16} className="-translate-x-0.5" />
+                    </div>
+                    <div className="absolute bottom-0 inset-x-0 z-[2] p-6 translate-y-4 group-hover:translate-y-0 transition-transform">
+                      <div className="text-xs tracking-[0.25em] text-primary uppercase mb-2">{p.category}</div>
+                      <div className={`text-foreground font-medium ${isFeatured ? "text-2xl" : "text-lg"}`}>{p.title}</div>
+                    </div>
+                    <div className="absolute top-0 inset-x-0 z-[2] h-2 film-strip translate-y-[-100%] group-hover:translate-y-0 transition-transform duration-500" />
+                    <div className="absolute bottom-0 inset-x-0 z-[2] h-2 film-strip translate-y-[100%] group-hover:translate-y-0 transition-transform duration-500" />
+                  </a>
+                </Reveal>
+              );
+            })}
           </div>
         </div>
       </section>

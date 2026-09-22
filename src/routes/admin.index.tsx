@@ -417,34 +417,42 @@ function SortableRow<T extends Record<string, string>>({
   const displayTitle = item.title || item.name || item.value || `عنصر #${idx + 1}`;
 
   return (
-    <div ref={setNodeRef} style={style} className="bg-card/40 border border-border rounded-xl p-4 space-y-2 relative">
-      <div className="flex items-center gap-3">
-        <button
-          type="button"
-          {...attributes}
-          {...listeners}
-          aria-label="سحب لإعادة الترتيب"
-          className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-primary p-1.5 rounded hover:bg-primary/10 touch-none shrink-0"
-        >
-          <GripVertical size={16} />
-        </button>
-        <button onClick={() => setExpanded(!expanded)} className="flex-1 text-right font-medium text-sm text-foreground hover:text-primary py-1 truncate">
-          {displayTitle}
-        </button>
-        <button onClick={onRemove}
-          className="shrink-0 text-destructive/70 hover:text-destructive p-1.5 rounded hover:bg-destructive/10">
-          <Trash2 size={16} />
-        </button>
-      </div>
-      {expanded && (
-        <div className="pt-4 space-y-3 border-t border-border mt-3">
-          {fields.map((f) => (
-            <Field key={f.k} label={f.l} value={String(item[f.k] ?? "")} textarea={f.textarea} options={f.options}
-              onChange={(v) => onChange(f.k, v)} />
-          ))}
+    <>
+      {expanded && <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-40 animate-in fade-in duration-300" onClick={() => setExpanded(false)} />}
+      <div ref={setNodeRef} style={style} className={`bg-card/40 border border-border rounded-xl p-4 space-y-2 relative transition-all duration-300 ${expanded ? "z-50 ring-2 ring-primary shadow-2xl bg-card scale-[1.01]" : "z-10"}`}>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            {...attributes}
+            {...listeners}
+            aria-label="سحب لإعادة الترتيب"
+            className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-primary p-1.5 rounded hover:bg-primary/10 touch-none shrink-0"
+          >
+            <GripVertical size={16} />
+          </button>
+          <button onClick={() => setExpanded(!expanded)} className="flex-1 text-right font-medium text-sm text-foreground hover:text-primary py-1 truncate">
+            {displayTitle}
+          </button>
+          <button onClick={onRemove}
+            className="shrink-0 text-destructive/70 hover:text-destructive p-1.5 rounded hover:bg-destructive/10">
+            <Trash2 size={16} />
+          </button>
         </div>
-      )}
-    </div>
+        {expanded && (
+          <div className="pt-4 space-y-3 border-t border-border mt-3 animate-in slide-in-from-top-4 fade-in duration-300 relative z-50">
+            {fields.map((f) => (
+              <Field key={f.k} label={f.l} value={String(item[f.k] ?? "")} textarea={f.textarea} options={f.options}
+                onChange={(v) => onChange(f.k, v)} />
+            ))}
+            <div className="pt-2">
+              <button onClick={() => setExpanded(false)} className="w-full py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors">
+                تم التعديل
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </>
   );
 }
 
