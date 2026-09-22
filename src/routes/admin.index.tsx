@@ -273,27 +273,35 @@ function LeadsPanel({ token }: { token: string | null }) {
 
 function Field({ label, value, onChange, textarea, options }: { label: string; value: string; onChange: (v: string) => void; textarea?: boolean; options?: { value: string; label: string }[] }) {
   const isImage = /صورة|لوغو|logo|image|avatar/i.test(label);
+  const [localVal, setLocalVal] = useState(value);
+  
+  useEffect(() => { setLocalVal(value); }, [value]);
+
+  const onBlur = () => {
+    if (localVal !== value) onChange(localVal);
+  };
+
   return (
     <label className="block space-y-1">
       <span className="text-xs text-muted-foreground">{label}</span>
       {options ? (
-        <select value={value} onChange={(e) => onChange(e.target.value)} className="w-full bg-card border border-border rounded-lg px-3 py-2 outline-none focus:border-primary">
+        <select value={localVal} onChange={(e) => { setLocalVal(e.target.value); onChange(e.target.value); }} className="w-full bg-card border border-border rounded-lg px-3 py-2 outline-none focus:border-primary">
           {options.map((o) => (
             <option key={o.value} value={o.value}>{o.label}</option>
           ))}
         </select>
       ) : textarea ? (
-        <textarea value={value} onChange={(e) => onChange(e.target.value)} rows={4} className="w-full bg-card border border-border rounded-lg px-3 py-2 outline-none focus:border-primary" />
+        <textarea value={localVal} onChange={(e) => setLocalVal(e.target.value)} onBlur={onBlur} rows={4} className="w-full bg-card border border-border rounded-lg px-3 py-2 outline-none focus:border-primary" />
       ) : (
         <div className="flex gap-2 items-stretch">
-          <input value={value} onChange={(e) => onChange(e.target.value)} className="flex-1 bg-card border border-border rounded-lg px-3 py-2 outline-none focus:border-primary" />
-          {isImage && <ImageUploadButton onUploaded={onChange} />}
+          <input value={localVal} onChange={(e) => setLocalVal(e.target.value)} onBlur={onBlur} className="flex-1 bg-card border border-border rounded-lg px-3 py-2 outline-none focus:border-primary" />
+          {isImage && <ImageUploadButton onUploaded={(url) => { setLocalVal(url); onChange(url); }} />}
         </div>
       )}
-      {isImage && value && (
+      {isImage && localVal && (
         <div className="relative inline-block mt-2">
-          <img src={value} alt="" className="h-16 w-auto rounded border border-border object-cover bg-card" />
-          <button type="button" onClick={() => onChange("")} className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 hover:scale-110 transition-transform shadow-lg">
+          <img src={localVal} alt="" className="h-16 w-auto rounded border border-border object-cover bg-card" />
+          <button type="button" onClick={() => { setLocalVal(""); onChange(""); }} className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 hover:scale-110 transition-transform shadow-lg">
             <Trash2 size={12} />
           </button>
         </div>
