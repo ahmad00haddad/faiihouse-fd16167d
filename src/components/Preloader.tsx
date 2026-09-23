@@ -6,31 +6,44 @@ export default function Preloader() {
   const [animatingOut, setAnimatingOut] = useState(false);
 
   useEffect(() => {
-    // Only run on the first visit per session so we don't annoy the user
-    if (sessionStorage.getItem("faii_preloader_done")) {
-      setVisible(false);
-      return;
+    try {
+      if (sessionStorage.getItem("faii_preloader_done")) {
+        setVisible(false);
+        return;
+      }
+    } catch (e) {
+      // Ignore
     }
 
-    // Fast cinematic loading progress (0 to 100 in ~1.5s)
-    let current = 0;
-    const interval = setInterval(() => {
-      current += Math.floor(Math.random() * 15) + 5;
-      if (current >= 100) {
-        current = 100;
-        clearInterval(interval);
+    let start: number | null = null;
+    let animationFrameId: number;
+    const DURATION = 1500; // 1.5 seconds
+
+    const animate = (timestamp: number) => {
+      if (!start) start = timestamp;
+      const elapsed = timestamp - start;
+      const rawProgress = Math.min((elapsed / DURATION) * 100, 100);
+      
+      // Easing out curve
+      const easedProgress = Math.floor(rawProgress === 100 ? 100 : 100 - Math.pow(1 - rawProgress / 100, 3) * 100);
+      
+      setProgress(easedProgress);
+
+      if (rawProgress < 100) {
+        animationFrameId = requestAnimationFrame(animate);
+      } else {
         setTimeout(() => {
           setAnimatingOut(true);
           setTimeout(() => {
             setVisible(false);
-            sessionStorage.setItem("faii_preloader_done", "true");
-          }, 800); // Match fade-out transition duration
-        }, 400); // short delay at 100%
+            try { sessionStorage.setItem("faii_preloader_done", "true"); } catch(e) {}
+          }, 800);
+        }, 400);
       }
-      setProgress(current);
-    }, 80);
+    };
 
-    return () => clearInterval(interval);
+    animationFrameId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animationFrameId);
   }, []);
 
   if (!visible) return null;
