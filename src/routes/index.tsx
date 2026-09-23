@@ -217,7 +217,7 @@ function HomePage() {
         </div>
       </section>
 
-      {/* CLIENTS */}
+      {/* CLIENTS (Temporarily Hidden) 
       <section className="py-24 px-6 lg:px-10">
         <div className="max-w-7xl mx-auto">
           <Reveal>
@@ -228,7 +228,6 @@ function HomePage() {
             </div>
           </Reveal>
 
-          {/* Marquee strip */}
           <div className="marquee mb-12">
             <div className="marquee-track">
               {[...clients, ...clients].map((c, i) => (
@@ -241,6 +240,7 @@ function HomePage() {
 
         </div>
       </section>
+      */}
 
       {/* CTA */}
       <section className="relative py-32 px-6 lg:px-10 overflow-hidden">
