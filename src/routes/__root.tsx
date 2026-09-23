@@ -124,12 +124,133 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: React.ReactNode }) {
+  const inlinePreloaderStyle = `
+    #faii-shell-preloader {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #0a0a0a;
+      transition: opacity 0.3s ease;
+    }
+    #faii-shell-preloader.done {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .faii-pre-kicker {
+      color: #c9a84c;
+      font-size: 10px;
+      letter-spacing: 0.5em;
+      margin-bottom: 12px;
+      font-family: monospace;
+    }
+    .faii-pre-num {
+      font-size: 6rem;
+      font-weight: 700;
+      color: #f5f5f5;
+      line-height: 1;
+      font-family: serif;
+    }
+    .faii-pre-num span {
+      font-size: 2.5rem;
+      color: #c9a84c;
+    }
+    .faii-pre-bar-wrap {
+      width: 12rem;
+      height: 1px;
+      background: #2a2a2a;
+      margin-top: 2rem;
+      overflow: hidden;
+      position: relative;
+    }
+    .faii-pre-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      background: #c9a84c;
+      box-shadow: 0 0 10px #c9a84c;
+      transition: width 0.05s linear;
+      width: 0%;
+    }
+    .faii-pre-label {
+      color: #555;
+      font-size: 9px;
+      letter-spacing: 0.3em;
+      margin-top: 1rem;
+      text-transform: uppercase;
+      font-family: monospace;
+    }
+  `;
+
+  const inlinePreloaderScript = `
+    (function() {
+      try {
+        if (sessionStorage.getItem('faii_preloader_done')) {
+          var el = document.getElementById('faii-shell-preloader');
+          if (el) el.style.display = 'none';
+          return;
+        }
+      } catch(e) {}
+
+      var numEl = document.getElementById('faii-pre-num');
+      var barEl = document.getElementById('faii-pre-bar');
+      var preloader = document.getElementById('faii-shell-preloader');
+      if (!numEl || !barEl || !preloader) return;
+
+      var start = null;
+      var DURATION = 600;
+
+      function ease(t) {
+        return t === 1 ? 1 : 1 - Math.pow(1 - t, 3);
+      }
+
+      function animate(timestamp) {
+        if (!start) start = timestamp;
+        var elapsed = timestamp - start;
+        var raw = Math.min(elapsed / DURATION, 1);
+        var progress = Math.floor(ease(raw) * 100);
+        numEl.textContent = progress + '%';
+        barEl.style.width = progress + '%';
+
+        if (raw < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          numEl.textContent = '100%';
+          barEl.style.width = '100%';
+          setTimeout(function() {
+            preloader.classList.add('done');
+            setTimeout(function() {
+              preloader.style.display = 'none';
+              try { sessionStorage.setItem('faii_preloader_done', 'true'); } catch(e) {}
+            }, 350);
+          }, 100);
+        }
+      }
+      requestAnimationFrame(animate);
+    })();
+  `;
+
   return (
     <html lang="ar" dir="rtl">
       <head>
         <HeadContent />
+        <style dangerouslySetInnerHTML={{ __html: inlinePreloaderStyle }} />
       </head>
       <body>
+        {/* Pure HTML/CSS preloader — visible INSTANTLY before React/JS loads */}
+        <div id="faii-shell-preloader">
+          <div className="faii-pre-kicker">FAII HOUSE</div>
+          <div className="faii-pre-num" id="faii-pre-num">0%</div>
+          <div className="faii-pre-bar-wrap">
+            <div className="faii-pre-bar" id="faii-pre-bar" />
+          </div>
+          <div className="faii-pre-label">Loading Scene...</div>
+        </div>
+        <script dangerouslySetInnerHTML={{ __html: inlinePreloaderScript }} />
         {children}
         <Scripts />
       </body>
@@ -144,7 +265,6 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
-      <Preloader />
       <SmoothScroll />
       <MagneticCursor />
       <PageTransition />
