@@ -27,10 +27,10 @@ type FormState = {
 const blank: FormState = { name: "", email: "", phone: "", location: "", start_when: "", portfolio_url: "", why: "", skills: "", edge: "" };
 
 const roles = [
-  { id: "01", title: "صُنّاع الصورة", desc: "مدراء تصوير، مصورون، ومصممو إضاءة يقدرون التكوين الفني." },
-  { id: "02", title: "السرد القصصي", desc: "كتاب سيناريو ونصوص إعلانية يتقنون تحويل الأفكار إلى قصص." },
-  { id: "03", title: "فنانو المونتاج", desc: "خبراء مونتاج وتلوين ومؤثرات بصرية يهتمون بأدق التفاصيل." },
-  { id: "04", title: "المواهب الفريدة", desc: "نرحب دوماً بأي موهبة استثنائية ترى في نفسها إضافة لفريقنا." },
+  { id: "01", icon: Camera, title: "صُنّاع الصورة", desc: "مدراء تصوير، مصورون، ومصممو إضاءة يقدرون التكوين الفني.", image: "/faii/port-film1.webp" },
+  { id: "02", icon: Edit3, title: "السرد القصصي", desc: "كتاب سيناريو ونصوص إعلانية يتقنون تحويل الأفكار إلى قصص.", image: "/faii/port-ad3.webp" },
+  { id: "03", icon: Film, title: "فنانو المونتاج", desc: "خبراء مونتاج وتلوين ومؤثرات بصرية يهتمون بأدق التفاصيل.", image: "/faii/port-doc2.webp" },
+  { id: "04", icon: Sparkles, title: "المواهب الفريدة", desc: "نرحب دوماً بأي موهبة استثنائية ترى في نفسها إضافة لفريقنا.", image: "/faii/port-ezwiti.webp" },
 ];
 
 function JobsPage() {
@@ -94,32 +94,47 @@ function JobsPage() {
         </div>
       </section>
 
-      {/* Elegant Roles List */}
-      <section className="py-24 px-6 lg:px-10 bg-surface/30 border-y border-border">
+      {/* Cinematic Roles Grid */}
+      <section className="py-24 px-6 lg:px-10 bg-surface/30">
         <div className="max-w-7xl mx-auto">
           <Reveal>
-            <div className="flex items-center justify-between mb-16 border-b border-border pb-8">
-              <h2 className="font-display text-2xl md:text-3xl text-foreground">مجالات الشغف المشترك</h2>
-              <span className="text-xs tracking-[0.2em] text-muted-foreground uppercase">Expertise</span>
+            <div className="flex items-center justify-between mb-12">
+              <div>
+                <h2 className="font-display text-2xl md:text-3xl text-foreground">مجالات الشغف المشترك</h2>
+                <p className="text-sm text-muted-foreground mt-3">نبحث عن مواهب تشاركنا نفس الرؤية والإتقان.</p>
+              </div>
+              <span className="text-xs tracking-[0.2em] text-muted-foreground uppercase hidden md:block">Expertise</span>
             </div>
           </Reveal>
 
-          <div className="flex flex-col">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {roles.map((r, i) => (
-              <Reveal key={r.id} delay={i * 100}>
-                <div className="group flex flex-col md:flex-row md:items-center justify-between py-10 border-b border-border hover:border-primary transition-colors cursor-default relative overflow-hidden">
-                  {/* Hover background effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/5 to-transparent -translate-x-full group-hover:translate-x-0 transition-transform duration-700 pointer-events-none" />
+              <Reveal key={r.id} delay={i * 100} className="h-full">
+                <div className="grain-card group relative rounded-[2rem] overflow-hidden bg-surface aspect-[4/5] flex flex-col justify-end p-8 border border-border/50 hover:border-primary/50 transition-colors h-full">
                   
-                  <div className="flex items-baseline gap-6 md:gap-12 relative z-10 mb-4 md:mb-0">
-                    <span className="font-display text-sm md:text-base text-muted-foreground tracking-widest">{r.id}</span>
-                    <h3 className="font-display text-2xl md:text-4xl text-foreground group-hover:text-primary transition-colors">{r.title}</h3>
+                  {/* Background Image */}
+                  <div className="absolute inset-0 z-0">
+                    <img src={r.image} alt={r.title} loading="lazy" className="w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-110 opacity-30 group-hover:opacity-70 mix-blend-luminosity group-hover:mix-blend-normal" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent" />
                   </div>
                   
-                  <div className="flex items-center gap-8 relative z-10 md:max-w-md">
-                    <p className="text-sm md:text-base text-muted-foreground leading-relaxed">{r.desc}</p>
-                    <ArrowUpLeft className="hidden md:block text-muted-foreground group-hover:text-primary transition-all group-hover:scale-110 opacity-0 group-hover:opacity-100 -translate-y-2 group-hover:translate-y-0" size={24} />
+                  {/* Content */}
+                  <div className="relative z-10">
+                    <div className="w-12 h-12 rounded-full bg-background/50 backdrop-blur border border-white/10 text-primary flex items-center justify-center mb-6 group-hover:-translate-y-2 transition-transform duration-500 shadow-elevated">
+                      <r.icon size={20} />
+                    </div>
+                    <div className="flex items-baseline gap-3 mb-3">
+                      <span className="font-display text-xs text-primary tracking-widest">{r.id}</span>
+                      <h3 className="font-display text-2xl text-foreground group-hover:text-primary transition-colors">{r.title}</h3>
+                    </div>
+                    <p className="text-sm text-muted-foreground leading-relaxed max-w-sm group-hover:text-foreground/90 transition-colors">
+                      {r.desc}
+                    </p>
                   </div>
+
+                  {/* Film strip accents */}
+                  <div className="absolute top-0 inset-x-0 h-2 film-strip translate-y-[-100%] group-hover:translate-y-0 transition-transform duration-700 z-10" />
+                  <div className="absolute bottom-0 inset-x-0 h-2 film-strip translate-y-[100%] group-hover:translate-y-0 transition-transform duration-700 z-10" />
                 </div>
               </Reveal>
             ))}
