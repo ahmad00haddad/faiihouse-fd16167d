@@ -5,6 +5,7 @@ import SiteFooter from "@/components/SiteFooter";
 import Reveal from "@/components/Reveal";
 import SplitText from "@/components/SplitText";
 import CountUp from "@/components/CountUp";
+import LazyImage from "@/components/LazyImage";
 import { useSiteContent } from "@/hooks/use-site-content";
 import slide1 from "@/assets/faii/slide1.webp";
 import banner from "@/assets/faii/baner.webp";
@@ -198,16 +199,16 @@ function HomePage() {
                   href={p.behance ?? "https://www.behance.net/faiihouse"}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="grain-card block group relative aspect-[4/5] rounded-2xl overflow-hidden"
+                  className="grain-card block group relative aspect-[4/5] rounded-2xl overflow-hidden bg-surface"
                 >
-                  <img src={p.image} alt={p.title} loading="lazy" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent opacity-80" />
-                  <div className="absolute bottom-0 inset-x-0 p-6">
+                  <LazyImage src={p.image} alt={p.title} wrapperClassName="absolute inset-0" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent opacity-80 z-[1]" />
+                  <div className="absolute bottom-0 inset-x-0 p-6 z-[2]">
                     <div className="text-xs tracking-[0.25em] text-primary mb-1 uppercase">{p.category}</div>
                     <div className="text-lg text-foreground">{p.title}</div>
                   </div>
-                  <div className="absolute top-0 inset-x-0 h-2 film-strip translate-y-[-100%] group-hover:translate-y-0 transition-transform duration-500" />
-                  <div className="absolute bottom-0 inset-x-0 h-2 film-strip translate-y-[100%] group-hover:translate-y-0 transition-transform duration-500" />
+                  <div className="absolute top-0 inset-x-0 h-2 film-strip translate-y-[-100%] group-hover:translate-y-0 transition-transform duration-500 z-[2]" />
+                  <div className="absolute bottom-0 inset-x-0 h-2 film-strip translate-y-[100%] group-hover:translate-y-0 transition-transform duration-500 z-[2]" />
                 </a>
               </Reveal>
             ))}

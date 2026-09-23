@@ -137,12 +137,14 @@ function RootShell({ children }: { children: React.ReactNode }) {
   );
 }
 
+import Preloader from "@/components/Preloader";
 import { Toaster } from "sonner";
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
+      <Preloader />
       <SmoothScroll />
       <MagneticCursor />
       <PageTransition />
