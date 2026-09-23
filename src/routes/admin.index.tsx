@@ -381,7 +381,8 @@ function ContactEditor({ content, setContent }: { content: SiteContent; setConte
   const set = (p: Partial<SiteContent["contact"]>) => setContent({ ...content, contact: { ...c, ...p } });
   return (
     <div className="grid md:grid-cols-2 gap-3 bg-card/40 border border-border rounded-xl p-5">
-      <Field label="الهاتف" value={c.phone} onChange={(v) => set({ phone: v })} />
+      <Field label="الهاتف الأساسي" value={c.phone} onChange={(v) => set({ phone: v })} />
+      <Field label="الهاتف الثانوي" value={c.phone2 || ""} onChange={(v) => set({ phone2: v })} />
       <Field label="الإيميل" value={c.email} onChange={(v) => set({ email: v })} />
       <Field label="العنوان" value={c.address} onChange={(v) => set({ address: v })} />
       <Field label="Instagram" value={c.instagram} onChange={(v) => set({ instagram: v })} />

@@ -47,7 +47,8 @@ function ContactPage() {
 
   const info = [
     { Icon: MapPin, title: "العنوان", value: contact.address },
-    { Icon: Phone, title: "اتصل بنا", value: contact.phone },
+    { Icon: Phone, title: "الهاتف الأول", value: contact.phone },
+    ...(contact.phone2 ? [{ Icon: Phone, title: "الهاتف الثاني", value: contact.phone2 }] : []),
     { Icon: Mail, title: "البريد", value: contact.email },
   ];
 

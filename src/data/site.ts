@@ -67,7 +67,7 @@ export type SiteContent = {
   hero: { kicker: string; title1: string; titleHighlight: string; tagline: string; subtitle: string };
   about: { title: string; body: string; goals: string; ambition: string };
   stats: { value: string; label: string; hint?: string }[];
-  contact: { phone: string; email: string; address: string; instagram: string; facebook: string; linkedin: string; behance: string };
+  contact: { phone: string; phone2?: string; email: string; address: string; instagram: string; facebook: string; linkedin: string; behance: string };
   showreelUrl: string;
   services: { title: string; desc: string }[];
   portfolio: { image: string; title: string; category: "film" | "documentary" | "ads"; behance: string }[];
@@ -96,6 +96,7 @@ export const defaultContent: SiteContent = {
   ],
   contact: {
     phone: "+962 79 925 6345",
+    phone2: "",
     email: "faii.house.jo@gmail.com",
     address: "الأردن — إربد",
     instagram: "https://www.instagram.com/faii.house/",

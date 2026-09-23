@@ -48,7 +48,10 @@ export default function SiteFooter() {
           <h4 className="text-sm tracking-[0.25em] text-primary mb-4">تواصل</h4>
           <ul className="space-y-3 text-muted-foreground text-sm">
             <li className="flex items-center gap-2"><MapPin size={14} className="text-primary" /> {contact.address}</li>
-            <li className="flex items-center gap-2" dir="ltr"><Phone size={14} className="text-primary" /> {contact.phone}</li>
+            <li className="flex flex-col gap-1 items-start">
+              <div className="flex items-center gap-2" dir="ltr"><Phone size={14} className="text-primary" /> {contact.phone}</div>
+              {contact.phone2 && <div className="flex items-center gap-2" dir="ltr"><Phone size={14} className="text-primary opacity-0" /> {contact.phone2}</div>}
+            </li>
             <li className="flex items-center gap-2"><Mail size={14} className="text-primary" /> {contact.email}</li>
           </ul>
         </div>
