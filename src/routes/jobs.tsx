@@ -5,7 +5,7 @@ import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import Reveal from "@/components/Reveal";
 import { submitJobApplication } from "@/lib/leads.functions";
-import { Send, Check, ArrowUpLeft } from "lucide-react";
+import { Send, Check, ArrowUpLeft, Camera, Edit3, Film, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/jobs")({
   component: JobsPage,
