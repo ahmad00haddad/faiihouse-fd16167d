@@ -4,7 +4,6 @@ import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import Reveal from "@/components/Reveal";
 import LazyImage from "@/components/LazyImage";
-import ProjectModal, { type Project } from "@/components/ProjectModal";
 import { type PortCategory, defaultContent } from "@/data/site";
 import { useSiteContent } from "@/hooks/use-site-content";
 import { ExternalLink } from "lucide-react";
@@ -56,7 +55,6 @@ const filters: { id: PortCategory; label: string }[] = [
 function PortfolioPage() {
   const { portfolio } = useSiteContent();
   const [active, setActive] = useState<PortCategory>("all");
-  const [activeProject, setActiveProject] = useState<Project | null>(null);
   
   const items = useMemo(() => {
     const arr = [...portfolio];
@@ -106,9 +104,11 @@ function PortfolioPage() {
               const isFeatured = i % 7 === 0;
               return (
                 <Reveal key={p.title + i} delay={(i % 8) * 40} className={isFeatured ? "sm:col-span-2 lg:col-span-2 xl:col-span-2" : "col-span-1"}>
-                  <button
-                    onClick={() => setActiveProject(p)}
-                    className={`block w-full text-right group relative rounded-2xl overflow-hidden bg-surface ${isFeatured ? "aspect-[4/3] sm:aspect-[16/9]" : "aspect-[4/5]"}`}
+                  <a
+                    href={p.behance ?? "https://www.behance.net/faiihouse"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`block group relative rounded-2xl overflow-hidden bg-surface ${isFeatured ? "aspect-[4/3] sm:aspect-[16/9]" : "aspect-[4/5]"}`}
                   >
                     <LazyImage
                       src={p.image}
@@ -126,15 +126,13 @@ function PortfolioPage() {
                     </div>
                     <div className="absolute top-0 inset-x-0 z-[2] h-2 film-strip translate-y-[-100%] group-hover:translate-y-0 transition-transform duration-500" />
                     <div className="absolute bottom-0 inset-x-0 z-[2] h-2 film-strip translate-y-[100%] group-hover:translate-y-0 transition-transform duration-500" />
-                  </button>
+                  </a>
                 </Reveal>
               );
             })}
           </div>
         </div>
       </section>
-
-      <ProjectModal project={activeProject} onClose={() => setActiveProject(null)} />
 
       <SiteFooter />
     </div>

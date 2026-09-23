@@ -6,9 +6,7 @@ import Reveal from "@/components/Reveal";
 import SplitText from "@/components/SplitText";
 import CountUp from "@/components/CountUp";
 import LazyImage from "@/components/LazyImage";
-import ProjectModal, { type Project } from "@/components/ProjectModal";
 import { useSiteContent } from "@/hooks/use-site-content";
-import { useState } from "react";
 
 const slide1 = "/faii/slide1.webp";
 const banner = "/faii/baner.webp";
@@ -35,7 +33,6 @@ function HomePage() {
   const content = useSiteContent();
   const { hero, stats, services, portfolio, clients, showreelUrl } = content;
   const featured = [...portfolio].slice(0, 6);
-  const [activeProject, setActiveProject] = useState<Project | null>(null);
 
   return (
     <div className="min-h-screen bg-background">
@@ -199,9 +196,11 @@ function HomePage() {
           <div className="grid md:grid-cols-3 gap-4">
             {featured.map((p, i) => (
               <Reveal key={p.title} delay={i * 80}>
-                <button
-                  onClick={() => setActiveProject(p)}
-                  className="grain-card block w-full text-right group relative aspect-[4/5] rounded-2xl overflow-hidden bg-surface"
+                <a
+                  href={p.behance ?? "https://www.behance.net/faiihouse"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="grain-card block group relative aspect-[4/5] rounded-2xl overflow-hidden bg-surface"
                 >
                   <LazyImage src={p.image} alt={p.title} wrapperClassName="absolute inset-0" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                   <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent opacity-80 z-[1]" />
@@ -211,7 +210,7 @@ function HomePage() {
                   </div>
                   <div className="absolute top-0 inset-x-0 h-2 film-strip translate-y-[-100%] group-hover:translate-y-0 transition-transform duration-500 z-[2]" />
                   <div className="absolute bottom-0 inset-x-0 h-2 film-strip translate-y-[100%] group-hover:translate-y-0 transition-transform duration-500 z-[2]" />
-                </button>
+                </a>
               </Reveal>
             ))}
           </div>
@@ -268,7 +267,6 @@ function HomePage() {
         </div>
       </section>
 
-      <ProjectModal project={activeProject} onClose={() => setActiveProject(null)} />
       <SiteFooter />
     </div>
   );
