@@ -28,10 +28,10 @@ type FormState = {
 const blank: FormState = { name: "", email: "", phone: "", location: "", start_when: "", portfolio_url: "", why: "", skills: "", edge: "" };
 
 const roles = [
-  { icon: Camera, title: "صنّاع الصورة", desc: "مدراء تصوير، مصورين، وإضاءة" },
-  { icon: Edit3, title: "كُتّاب إبداعيين", desc: "كتاب نصوص، إعلانات، وسيناريو" },
-  { icon: Film, title: "سحرة المونتاج", desc: "مونتير، تلوين، ومؤثرات بصرية" },
-  { icon: Sparkles, title: "مجانين إبداع", desc: "أي موهبة بتشوف إنها بتشبهنا" },
+  { icon: Camera, title: "صُنّاع الصورة", desc: "مدراء تصوير، مصورون، ومصممو إضاءة يقدرون التكوين الفني." },
+  { icon: Edit3, title: "السرد القصصي", desc: "كتاب سيناريو ونصوص إعلانية يتقنون تحويل الأفكار إلى قصص." },
+  { icon: Film, title: "فنانو المونتاج", desc: "خبراء مونتاج وتلوين ومؤثرات بصرية يهتمون بأدق التفاصيل." },
+  { icon: Sparkles, title: "المواهب الفريدة", desc: "نرحب دوماً بأي موهبة استثنائية ترى في نفسها إضافة لفريقنا." },
 ];
 
 function JobsPage() {
@@ -72,17 +72,17 @@ function JobsPage() {
         <div className="max-w-4xl mx-auto relative z-10">
           <Reveal>
             <div className="inline-block px-4 py-1.5 rounded-full border border-primary/30 bg-primary/5 text-primary text-xs tracking-[0.3em] mb-8 font-display">
-              OPEN CASTING
+              JOIN THE TEAM
             </div>
-            <h1 className="font-display text-5xl md:text-7xl lg:text-8xl text-foreground leading-[1.1] mb-6">
-              نحن لسنا شركة...
+            <h1 className="font-display text-4xl md:text-6xl lg:text-7xl text-foreground leading-[1.1] mb-6">
+              مساحة للإبداع،
               <br />
-              <span className="text-primary italic">نحن فريق من المبدعين</span>
+              <span className="text-primary italic">تجمعنا الرؤية والإتقان</span>
             </h1>
           </Reveal>
           <Reveal delay={150}>
             <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              إحنا مجموعة شباب بنتنفس سينما وصورة، ما بنحب الروتين ولا القوالب الجاهزة. إذا كنت شغوف، مجنون بشغلك، وبتحب تطلع بأفكار بتكسر المألوف.. مكانك بيننا!
+              نؤمن في فَيّ بأن الأعمال العظيمة تُصنع بجهد جماعي وشغف حقيقي بالصناعة. نحن فريق يُقدر الحرفة والالتزام، ونرحب دائماً بالمواهب التي تشاركنا نفس القيم لتقديم مشاريع تترك أثراً بصرياً وفنياً عالياً.
             </p>
           </Reveal>
         </div>
@@ -93,8 +93,8 @@ function JobsPage() {
         <div className="max-w-6xl mx-auto">
           <Reveal>
             <div className="text-center mb-16">
-              <h2 className="font-display text-3xl md:text-4xl">مين بنستنى؟</h2>
-              <p className="text-muted-foreground mt-4">بابنا مفتوح دائماً لأي موهبة حقيقية.</p>
+              <h2 className="font-display text-3xl md:text-4xl">مجالات الشغف المشترك</h2>
+              <p className="text-muted-foreground mt-4">بابنا مفتوح دائماً لأصحاب الموهبة والحرفة.</p>
             </div>
           </Reveal>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -119,7 +119,7 @@ function JobsPage() {
           <Reveal>
             <div className="text-center mb-16">
               <div className="text-xs tracking-[0.3em] text-primary mb-3">APPLY NOW</div>
-              <h2 className="font-display text-3xl md:text-5xl text-foreground">احجز مقعدك</h2>
+              <h2 className="font-display text-3xl md:text-5xl text-foreground">لنبدأ الحوار</h2>
             </div>
           </Reveal>
 
@@ -129,9 +129,9 @@ function JobsPage() {
                 <div className="w-20 h-20 mx-auto rounded-full bg-primary/10 text-primary flex items-center justify-center mb-6">
                   <Check size={40} strokeWidth={2} />
                 </div>
-                <h3 className="font-display text-3xl mb-4">وصلنا ملفك!</h3>
+                <h3 className="font-display text-3xl mb-4">تم الاستلام بنجاح</h3>
                 <p className="text-muted-foreground max-w-md mx-auto leading-relaxed">
-                  شكراً لأنك شاركتنا شغفك. رح نشوف أعمالك، وإذا كان الـ vibe بينا راكب، رح نتواصل معك قريباً جداً.
+                  شكراً لاهتمامك بالانضمام لفريقنا. سيقوم فريق الإخراج بمراجعة أعمالك، وسنتواصل معك قريباً في حال وجود فرصة تتناسب مع مهاراتك.
                 </p>
               </div>
             ) : (
@@ -139,40 +139,40 @@ function JobsPage() {
                 <div className="grid md:grid-cols-2 gap-6 mb-6">
                   <div className="field">
                     <input id="j-name" placeholder=" " required value={form.name} onChange={(e) => set("name", e.target.value)} />
-                    <label htmlFor="j-name">اسمك الكريم</label>
+                    <label htmlFor="j-name">الاسم الثلاثي</label>
                   </div>
                   <div className="field">
                     <input id="j-email" type="email" placeholder=" " required dir="ltr" value={form.email} onChange={(e) => set("email", e.target.value)} />
-                    <label htmlFor="j-email">الإيميل</label>
+                    <label htmlFor="j-email">البريد الإلكتروني</label>
                   </div>
                   <div className="field">
                     <input id="j-phone" type="tel" placeholder=" " dir="ltr" value={form.phone} onChange={(e) => set("phone", e.target.value)} />
-                    <label htmlFor="j-phone">رقم الموبايل</label>
+                    <label htmlFor="j-phone">رقم الهاتف</label>
                   </div>
                   <div className="field">
                     <input id="j-loc" placeholder=" " value={form.location} onChange={(e) => set("location", e.target.value)} />
-                    <label htmlFor="j-loc">وين ساكن؟</label>
+                    <label htmlFor="j-loc">مكان الإقامة</label>
                   </div>
                 </div>
 
                 <div className="field mb-6">
                   <input id="j-port" type="url" placeholder=" " dir="ltr" required value={form.portfolio_url} onChange={(e) => set("portfolio_url", e.target.value)} />
-                  <label htmlFor="j-port">رابط أعمالك (Behance, Vimeo, Drive...)</label>
+                  <label htmlFor="j-port">رابط معرض الأعمال (Behance, Vimeo, Drive)</label>
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-6 mb-6">
                   <div className="field">
                     <textarea id="j-why" placeholder=" " rows={3} required value={form.why} onChange={(e) => set("why", e.target.value)} />
-                    <label htmlFor="j-why">ليش فَيّ تحديداً؟</label>
+                    <label htmlFor="j-why">لماذا فَيّ تحديداً؟</label>
                   </div>
                   <div className="field">
                     <textarea id="j-edge" placeholder=" " rows={3} value={form.edge} onChange={(e) => set("edge", e.target.value)} />
-                    <label htmlFor="j-edge">شو الإشي اللي بيميزك عن غيرك؟</label>
+                    <label htmlFor="j-edge">ما الذي يميز أسلوبك عن غيرك؟</label>
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between mt-10 pt-8 border-t border-border">
-                  <p className="text-xs text-muted-foreground">راجع بياناتك قبل ما تبعت 🎬</p>
+                  <p className="text-xs text-muted-foreground">راجع بياناتك قبل الإرسال 🎬</p>
                   <button
                     type="submit"
                     disabled={sending || !form.name || !form.email || !form.portfolio_url}
