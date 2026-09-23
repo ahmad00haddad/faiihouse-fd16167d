@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Facebook, Instagram, Linkedin, Mail, MapPin, Phone } from "lucide-react";
-const logo = "/faii/logo-white.png";
+const logo = "/faii/logo-circle.webp";
 import { useSiteContent } from "@/hooks/use-site-content";
 
 export default function SiteFooter() {

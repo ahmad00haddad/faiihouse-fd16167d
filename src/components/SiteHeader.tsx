@@ -1,7 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
-const logo = "/faii/logo-white.png";
+const logo = "/faii/logo-circle.webp";
 
 const nav = [
   { to: "/", label: "الرئيسية" },

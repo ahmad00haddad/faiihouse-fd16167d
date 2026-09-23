@@ -120,28 +120,23 @@
   .grain::after {
     content: "";
     position: absolute;
-    inset: -10%;
+    inset: 0;
     pointer-events: none;
     z-index: 2;
     background-image:
-      radial-gradient(oklch(1 0 0 / 0.04) 1px, transparent 1px),
-      radial-gradient(oklch(1 0 0 / 0.025) 1px, transparent 1px);
-    background-size: 3px 3px, 7px 7px;
-    mix-blend-mode: overlay;
-    animation: grainShift 1.6s steps(6) infinite;
+      radial-gradient(oklch(1 0 0 / 0.03) 1px, transparent 1px);
+    background-size: 3px 3px;
     opacity: 0.55;
   }
 
   .film-grain-global {
     position: fixed;
-    inset: -10%;
+    inset: 0;
     pointer-events: none;
     z-index: 60;
-    opacity: 0.06;
-    mix-blend-mode: overlay;
+    opacity: 0.04;
     background-image: radial-gradient(oklch(1 0 0 / 0.7) 1px, transparent 1px);
     background-size: 3px 3px;
-    animation: grainShift 1.4s steps(8) infinite;
   }
 
   .scanlines::before {
