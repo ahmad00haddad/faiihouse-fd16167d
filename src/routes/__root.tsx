@@ -124,61 +124,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: React.ReactNode }) {
-  const preloaderHtml = `
-    <div id="faii-shell-preloader" style="position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#0a0a0a;transition:opacity 0.3s ease;">
-      <div style="color:#c9a84c;font-size:10px;letter-spacing:0.5em;margin-bottom:12px;font-family:monospace;">FAII HOUSE</div>
-      <div id="faii-pre-num" style="font-size:6rem;font-weight:700;color:#f5f5f5;line-height:1;font-family:serif;">0%</div>
-      <div style="width:12rem;height:1px;background:#2a2a2a;margin-top:2rem;overflow:hidden;position:relative;">
-        <div id="faii-pre-bar" style="position:absolute;top:0;left:0;height:100%;background:#c9a84c;box-shadow:0 0 10px #c9a84c;width:0%;"></div>
-      </div>
-      <div style="color:#555;font-size:9px;letter-spacing:0.3em;margin-top:1rem;text-transform:uppercase;font-family:monospace;">Loading Scene...</div>
-    </div>
-    <script>
-    (function() {
-      try {
-        if (sessionStorage.getItem('faii_preloader_done')) {
-          document.getElementById('faii-shell-preloader').style.display = 'none';
-          return;
-        }
-      } catch(e) {}
-      var numEl = document.getElementById('faii-pre-num');
-      var barEl = document.getElementById('faii-pre-bar');
-      var preEl = document.getElementById('faii-shell-preloader');
-      if (!numEl || !barEl || !preEl) return;
-      var start = null;
-      var DURATION = 700;
-      function ease(t){ return t>=1?1:1-Math.pow(1-t,3); }
-      function tick(ts) {
-        if (!start) start = ts;
-        var p = Math.floor(ease(Math.min((ts-start)/DURATION,1))*100);
-        numEl.textContent = p + '%';
-        barEl.style.width = p + '%';
-        if (p < 100) { requestAnimationFrame(tick); }
-        else {
-          numEl.textContent = '100%';
-          barEl.style.width = '100%';
-          setTimeout(function(){
-            preEl.style.opacity='0';
-            setTimeout(function(){
-              preEl.style.display='none';
-              try{sessionStorage.setItem('faii_preloader_done','true');}catch(e){}
-            },350);
-          },100);
-        }
-      }
-      requestAnimationFrame(tick);
-    })();
-    <\/script>
-  `;
-
   return (
     <html lang="ar" dir="rtl">
       <head>
         <HeadContent />
       </head>
       <body>
-        {/* Injected as raw HTML so React never hydrates/resets it */}
-        <div dangerouslySetInnerHTML={{ __html: preloaderHtml }} />
         {children}
         <Scripts />
       </body>
