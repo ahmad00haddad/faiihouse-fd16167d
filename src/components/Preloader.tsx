@@ -17,7 +17,7 @@ export default function Preloader() {
 
     let start: number | null = null;
     let animationFrameId: number;
-    const DURATION = 1500; // 1.5 seconds
+    const DURATION = 600; // 0.6 seconds to count to 100 (super fast)
 
     const animate = (timestamp: number) => {
       if (!start) start = timestamp;
@@ -37,8 +37,8 @@ export default function Preloader() {
           setTimeout(() => {
             setVisible(false);
             try { sessionStorage.setItem("faii_preloader_done", "true"); } catch(e) {}
-          }, 800);
-        }, 400);
+          }, 400); // reduced from 800
+        }, 100); // reduced from 400
       }
     };
 
@@ -50,7 +50,7 @@ export default function Preloader() {
 
   return (
     <div
-      className={`fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-background transition-opacity duration-700 ${
+      className={`fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-background transition-opacity duration-300 ${
         animatingOut ? "opacity-0 pointer-events-none" : "opacity-100"
       }`}
     >
