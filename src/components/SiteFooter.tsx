@@ -58,9 +58,12 @@ export default function SiteFooter() {
       </div>
 
       <div className="border-t border-border">
-        <div className="max-w-7xl mx-auto px-6 lg:px-10 py-5 flex flex-col md:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
+        <div className="max-w-7xl mx-auto px-6 lg:px-10 py-5 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-muted-foreground text-center md:text-right">
           <p>© {new Date().getFullYear()} Faii House — جميع الحقوق محفوظة</p>
-          <p className="tracking-[0.2em]">CINEMA · STORY · CRAFT</p>
+          <p className="tracking-[0.2em] hidden lg:block opacity-60">CINEMA · STORY · CRAFT</p>
+          <p>
+            تم تصميمه بواسطة: <a href="https://haddad-dev.lovable.app/" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors font-medium">أحمد حداد</a>
+          </p>
         </div>
       </div>
     </footer>
