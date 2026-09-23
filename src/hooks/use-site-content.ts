@@ -68,6 +68,7 @@ export function useSiteContent(): SiteContent {
     queryKey: KEY,
     queryFn: fetchSiteContent,
     staleTime: 10_000,
+    enabled: hydrated, // Prevent slow SSR blocking by only fetching on client
     refetchOnMount: "always",
     refetchOnWindowFocus: true,
     placeholderData: hydrated ? (readCache() ?? defaultContent) : defaultContent,
