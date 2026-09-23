@@ -110,18 +110,18 @@ function JobsPage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {roles.map((r, i) => (
               <Reveal key={r.id} delay={i * 100} className="h-full">
-                <div className="grain-card group relative rounded-[2rem] overflow-hidden bg-surface aspect-[4/5] flex flex-col justify-end p-8 border border-border/50 hover:border-primary/50 transition-colors h-full">
+                <div className="grain-card group relative rounded-[2rem] overflow-hidden bg-surface/40 flex flex-col justify-center items-center text-center p-8 border border-border/50 hover:border-primary/30 transition-colors h-full min-h-[340px]">
                   
                   {/* Content */}
-                  <div className="relative z-10">
-                    <div className="w-12 h-12 rounded-full bg-background/50 backdrop-blur border border-white/10 text-primary flex items-center justify-center mb-6 group-hover:-translate-y-2 transition-transform duration-500 shadow-elevated">
-                      <r.icon size={20} />
+                  <div className="relative z-10 flex flex-col items-center">
+                    <div className="w-16 h-16 rounded-full bg-background border border-white/5 text-primary flex items-center justify-center mb-8 group-hover:scale-110 group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-all duration-500 shadow-elevated">
+                      <r.icon size={24} />
                     </div>
-                    <div className="flex items-baseline gap-3 mb-3">
-                      <span className="font-display text-xs text-primary tracking-widest">{r.id}</span>
+                    <div className="mb-4">
+                      <span className="font-display text-xs text-primary/60 tracking-widest mb-3 block">{r.id}</span>
                       <h3 className="font-display text-2xl text-foreground group-hover:text-primary transition-colors">{r.title}</h3>
                     </div>
-                    <p className="text-sm text-muted-foreground leading-relaxed max-w-sm group-hover:text-foreground/90 transition-colors">
+                    <p className="text-sm text-muted-foreground leading-relaxed group-hover:text-foreground/90 transition-colors">
                       {r.desc}
                     </p>
                   </div>
