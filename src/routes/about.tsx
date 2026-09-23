@@ -5,7 +5,7 @@ import SiteFooter from "@/components/SiteFooter";
 import Reveal from "@/components/Reveal";
 import SplitText from "@/components/SplitText";
 import { useSiteContent } from "@/hooks/use-site-content";
-import banner from "@/assets/faii/baner.webp";
+const banner = "/faii/baner.webp";
 import { ArrowLeft } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 

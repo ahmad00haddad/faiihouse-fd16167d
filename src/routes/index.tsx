@@ -7,8 +7,9 @@ import SplitText from "@/components/SplitText";
 import CountUp from "@/components/CountUp";
 import LazyImage from "@/components/LazyImage";
 import { useSiteContent } from "@/hooks/use-site-content";
-import slide1 from "@/assets/faii/slide1.webp";
-import banner from "@/assets/faii/baner.webp";
+
+const slide1 = "/faii/slide1.webp";
+const banner = "/faii/baner.webp";
 
 export const Route = createFileRoute("/")({
   component: HomePage,
