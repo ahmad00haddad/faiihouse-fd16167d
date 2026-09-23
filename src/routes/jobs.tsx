@@ -4,9 +4,8 @@ import { useServerFn } from "@tanstack/react-start";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import Reveal from "@/components/Reveal";
-import SplitText from "@/components/SplitText";
 import { submitJobApplication } from "@/lib/leads.functions";
-import { Send, Check, Film, Camera, Edit3, Sparkles } from "lucide-react";
+import { Send, Check, ArrowUpLeft } from "lucide-react";
 
 export const Route = createFileRoute("/jobs")({
   component: JobsPage,
@@ -28,10 +27,10 @@ type FormState = {
 const blank: FormState = { name: "", email: "", phone: "", location: "", start_when: "", portfolio_url: "", why: "", skills: "", edge: "" };
 
 const roles = [
-  { icon: Camera, title: "صُنّاع الصورة", desc: "مدراء تصوير، مصورون، ومصممو إضاءة يقدرون التكوين الفني." },
-  { icon: Edit3, title: "السرد القصصي", desc: "كتاب سيناريو ونصوص إعلانية يتقنون تحويل الأفكار إلى قصص." },
-  { icon: Film, title: "فنانو المونتاج", desc: "خبراء مونتاج وتلوين ومؤثرات بصرية يهتمون بأدق التفاصيل." },
-  { icon: Sparkles, title: "المواهب الفريدة", desc: "نرحب دوماً بأي موهبة استثنائية ترى في نفسها إضافة لفريقنا." },
+  { id: "01", title: "صُنّاع الصورة", desc: "مدراء تصوير، مصورون، ومصممو إضاءة يقدرون التكوين الفني." },
+  { id: "02", title: "السرد القصصي", desc: "كتاب سيناريو ونصوص إعلانية يتقنون تحويل الأفكار إلى قصص." },
+  { id: "03", title: "فنانو المونتاج", desc: "خبراء مونتاج وتلوين ومؤثرات بصرية يهتمون بأدق التفاصيل." },
+  { id: "04", title: "المواهب الفريدة", desc: "نرحب دوماً بأي موهبة استثنائية ترى في نفسها إضافة لفريقنا." },
 ];
 
 function JobsPage() {
@@ -58,54 +57,69 @@ function JobsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background overflow-x-hidden">
+    <div className="min-h-screen bg-background overflow-x-hidden selection:bg-primary/30">
       <SiteHeader />
 
-      {/* Cinematic Hero */}
-      <section className="relative pt-40 pb-20 px-6 lg:px-10 min-h-[70vh] flex flex-col justify-center items-center text-center">
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-0 inset-x-0 h-4 film-strip opacity-30" />
-          <div className="absolute bottom-0 inset-x-0 h-4 film-strip opacity-30" />
-          <div className="absolute inset-0 bg-gradient-radial from-primary/10 via-background to-background" />
-        </div>
+      {/* Premium Hero */}
+      <section className="pt-48 pb-32 px-6 lg:px-10 relative">
+        {/* Subtle background glow */}
+        <div className="absolute top-0 right-0 w-[50vw] h-[50vw] bg-primary/5 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/4 pointer-events-none" />
         
-        <div className="max-w-4xl mx-auto relative z-10">
-          <Reveal>
-            <div className="inline-block px-4 py-1.5 rounded-full border border-primary/30 bg-primary/5 text-primary text-xs tracking-[0.3em] mb-8 font-display">
-              JOIN THE TEAM
+        <div className="max-w-7xl mx-auto">
+          <div className="grid lg:grid-cols-12 gap-12 lg:gap-8 items-end">
+            <div className="lg:col-span-8">
+              <Reveal>
+                <div className="flex items-center gap-4 mb-8">
+                  <div className="w-12 h-px bg-primary/50" />
+                  <span className="text-primary text-xs tracking-[0.4em] font-display uppercase">Join the Team</span>
+                </div>
+                <h1 className="font-display text-5xl md:text-7xl lg:text-8xl text-foreground leading-[1.1] mb-6">
+                  مساحة للإبداع،
+                  <br />
+                  <span className="text-muted-foreground">تجمعنا الرؤية</span>
+                  <br />
+                  <span className="italic text-primary">والإتقان.</span>
+                </h1>
+              </Reveal>
             </div>
-            <h1 className="font-display text-4xl md:text-6xl lg:text-7xl text-foreground leading-[1.1] mb-6">
-              مساحة للإبداع،
-              <br />
-              <span className="text-primary italic">تجمعنا الرؤية والإتقان</span>
-            </h1>
-          </Reveal>
-          <Reveal delay={150}>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              نؤمن في فَيّ بأن الأعمال العظيمة تُصنع بجهد جماعي وشغف حقيقي بالصناعة. نحن فريق يُقدر الحرفة والالتزام، ونرحب دائماً بالمواهب التي تشاركنا نفس القيم لتقديم مشاريع تترك أثراً بصرياً وفنياً عالياً.
-            </p>
-          </Reveal>
+            
+            <div className="lg:col-span-4 lg:pb-4">
+              <Reveal delay={150}>
+                <p className="text-lg text-muted-foreground leading-relaxed">
+                  نؤمن في فَيّ بأن الأعمال العظيمة تُصنع بجهد جماعي وشغف حقيقي بالصناعة. نحن فريق يُقدر الحرفة والالتزام، ونرحب دائماً بالمواهب التي تشاركنا نفس القيم لتقديم مشاريع تترك أثراً بصرياً وفنياً عالياً.
+                </p>
+              </Reveal>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Roles Grid */}
-      <section className="py-20 px-6 lg:px-10 bg-surface/30">
-        <div className="max-w-6xl mx-auto">
+      {/* Elegant Roles List */}
+      <section className="py-24 px-6 lg:px-10 bg-surface/30 border-y border-border">
+        <div className="max-w-7xl mx-auto">
           <Reveal>
-            <div className="text-center mb-16">
-              <h2 className="font-display text-3xl md:text-4xl">مجالات الشغف المشترك</h2>
-              <p className="text-muted-foreground mt-4">بابنا مفتوح دائماً لأصحاب الموهبة والحرفة.</p>
+            <div className="flex items-center justify-between mb-16 border-b border-border pb-8">
+              <h2 className="font-display text-2xl md:text-3xl text-foreground">مجالات الشغف المشترك</h2>
+              <span className="text-xs tracking-[0.2em] text-muted-foreground uppercase">Expertise</span>
             </div>
           </Reveal>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+
+          <div className="flex flex-col">
             {roles.map((r, i) => (
-              <Reveal key={r.title} delay={i * 100}>
-                <div className="p-8 rounded-3xl bg-card border border-border hover:border-primary/50 transition-colors group h-full">
-                  <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-500">
-                    <r.icon size={24} />
+              <Reveal key={r.id} delay={i * 100}>
+                <div className="group flex flex-col md:flex-row md:items-center justify-between py-10 border-b border-border hover:border-primary transition-colors cursor-default relative overflow-hidden">
+                  {/* Hover background effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/5 to-transparent -translate-x-full group-hover:translate-x-0 transition-transform duration-700 pointer-events-none" />
+                  
+                  <div className="flex items-baseline gap-6 md:gap-12 relative z-10 mb-4 md:mb-0">
+                    <span className="font-display text-sm md:text-base text-muted-foreground tracking-widest">{r.id}</span>
+                    <h3 className="font-display text-2xl md:text-4xl text-foreground group-hover:text-primary transition-colors">{r.title}</h3>
                   </div>
-                  <h3 className="text-xl text-foreground mb-3 font-medium">{r.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{r.desc}</p>
+                  
+                  <div className="flex items-center gap-8 relative z-10 md:max-w-md">
+                    <p className="text-sm md:text-base text-muted-foreground leading-relaxed">{r.desc}</p>
+                    <ArrowUpLeft className="hidden md:block text-muted-foreground group-hover:text-primary transition-all group-hover:scale-110 opacity-0 group-hover:opacity-100 -translate-y-2 group-hover:translate-y-0" size={24} />
+                  </div>
                 </div>
               </Reveal>
             ))}
@@ -113,81 +127,101 @@ function JobsPage() {
         </div>
       </section>
 
-      {/* Application Form */}
-      <section className="py-32 px-6 lg:px-10">
-        <div className="max-w-4xl mx-auto">
-          <Reveal>
-            <div className="text-center mb-16">
-              <div className="text-xs tracking-[0.3em] text-primary mb-3">APPLY NOW</div>
-              <h2 className="font-display text-3xl md:text-5xl text-foreground">لنبدأ الحوار</h2>
-            </div>
-          </Reveal>
-
-          <Reveal delay={150}>
-            {sent ? (
-              <div className="p-12 text-center rounded-3xl bg-surface border border-border shadow-elevated">
-                <div className="w-20 h-20 mx-auto rounded-full bg-primary/10 text-primary flex items-center justify-center mb-6">
-                  <Check size={40} strokeWidth={2} />
+      {/* Minimalist Split Form */}
+      <section className="py-32 px-6 lg:px-10 relative">
+        <div className="absolute bottom-0 left-0 w-[40vw] h-[40vw] bg-primary/5 rounded-full blur-[120px] translate-y-1/2 -translate-x-1/4 pointer-events-none" />
+        
+        <div className="max-w-7xl mx-auto grid lg:grid-cols-12 gap-16 lg:gap-24">
+          <div className="lg:col-span-5">
+            <Reveal>
+              <div className="sticky top-32">
+                <div className="flex items-center gap-4 mb-8">
+                  <div className="w-12 h-px bg-primary/50" />
+                  <span className="text-primary text-xs tracking-[0.4em] font-display uppercase">Apply Now</span>
                 </div>
-                <h3 className="font-display text-3xl mb-4">تم الاستلام بنجاح</h3>
-                <p className="text-muted-foreground max-w-md mx-auto leading-relaxed">
-                  شكراً لاهتمامك بالانضمام لفريقنا. سيقوم فريق الإخراج بمراجعة أعمالك، وسنتواصل معك قريباً في حال وجود فرصة تتناسب مع مهاراتك.
+                <h2 className="font-display text-4xl md:text-6xl text-foreground mb-6">لنبدأ<br/>الحوار.</h2>
+                <p className="text-muted-foreground leading-relaxed text-lg mb-12 max-w-sm">
+                  إذا كنت ترى أن أسلوبك يتناغم مع رؤيتنا، فلا تتردد في مشاركة أعمالك معنا. نحن نقرأ كل طلب بعناية.
                 </p>
               </div>
-            ) : (
-              <form onSubmit={onSubmit} className="p-8 md:p-12 rounded-[2.5rem] bg-surface border border-border shadow-elevated">
-                <div className="grid md:grid-cols-2 gap-6 mb-6">
-                  <div className="field">
-                    <input id="j-name" placeholder=" " required value={form.name} onChange={(e) => set("name", e.target.value)} />
-                    <label htmlFor="j-name">الاسم الثلاثي</label>
-                  </div>
-                  <div className="field">
-                    <input id="j-email" type="email" placeholder=" " required dir="ltr" value={form.email} onChange={(e) => set("email", e.target.value)} />
-                    <label htmlFor="j-email">البريد الإلكتروني</label>
-                  </div>
-                  <div className="field">
-                    <input id="j-phone" type="tel" placeholder=" " dir="ltr" value={form.phone} onChange={(e) => set("phone", e.target.value)} />
-                    <label htmlFor="j-phone">رقم الهاتف</label>
-                  </div>
-                  <div className="field">
-                    <input id="j-loc" placeholder=" " value={form.location} onChange={(e) => set("location", e.target.value)} />
-                    <label htmlFor="j-loc">مكان الإقامة</label>
-                  </div>
-                </div>
+            </Reveal>
+          </div>
 
-                <div className="field mb-6">
-                  <input id="j-port" type="url" placeholder=" " dir="ltr" required value={form.portfolio_url} onChange={(e) => set("portfolio_url", e.target.value)} />
-                  <label htmlFor="j-port">رابط معرض الأعمال (Behance, Vimeo, Drive)</label>
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-6 mb-6">
-                  <div className="field">
-                    <textarea id="j-why" placeholder=" " rows={3} required value={form.why} onChange={(e) => set("why", e.target.value)} />
-                    <label htmlFor="j-why">لماذا فَيّ تحديداً؟</label>
+          <div className="lg:col-span-7">
+            <Reveal delay={150}>
+              {sent ? (
+                <div className="h-full min-h-[400px] flex flex-col justify-center items-center text-center p-12 border border-border rounded-3xl bg-surface/30">
+                  <div className="w-24 h-24 rounded-full bg-primary/10 text-primary flex items-center justify-center mb-8">
+                    <Check size={48} strokeWidth={1.5} />
                   </div>
-                  <div className="field">
-                    <textarea id="j-edge" placeholder=" " rows={3} value={form.edge} onChange={(e) => set("edge", e.target.value)} />
-                    <label htmlFor="j-edge">ما الذي يميز أسلوبك عن غيرك؟</label>
+                  <h3 className="font-display text-3xl mb-4">تم الاستلام بنجاح</h3>
+                  <p className="text-muted-foreground leading-relaxed max-w-md mx-auto">
+                    شكراً لاهتمامك بالانضمام لفريقنا. سيقوم فريق الإخراج بمراجعة أعمالك، وسنتواصل معك قريباً في حال وجود فرصة تتناسب مع مهاراتك.
+                  </p>
+                </div>
+              ) : (
+                <form onSubmit={onSubmit} className="flex flex-col gap-10">
+                  <div className="grid sm:grid-cols-2 gap-10">
+                    <div className="relative group">
+                      <input id="j-name" required value={form.name} onChange={(e) => set("name", e.target.value)}
+                        className="w-full bg-transparent border-b border-border pb-4 pt-2 text-foreground focus:outline-none focus:border-primary transition-colors peer placeholder-transparent" placeholder="الاسم" />
+                      <label htmlFor="j-name" className="absolute right-0 top-2 text-muted-foreground text-sm transition-all peer-focus:-top-5 peer-focus:text-xs peer-focus:text-primary peer-valid:-top-5 peer-valid:text-xs cursor-text">الاسم الثلاثي</label>
+                    </div>
+                    <div className="relative group">
+                      <input id="j-email" type="email" required dir="ltr" value={form.email} onChange={(e) => set("email", e.target.value)}
+                        className="w-full bg-transparent border-b border-border pb-4 pt-2 text-foreground focus:outline-none focus:border-primary transition-colors peer placeholder-transparent text-left" placeholder="Email" />
+                      <label htmlFor="j-email" className="absolute right-0 top-2 text-muted-foreground text-sm transition-all peer-focus:-top-5 peer-focus:text-xs peer-focus:text-primary peer-valid:-top-5 peer-valid:text-xs cursor-text">البريد الإلكتروني</label>
+                    </div>
                   </div>
-                </div>
 
-                <div className="flex items-center justify-between mt-10 pt-8 border-t border-border">
-                  <p className="text-xs text-muted-foreground">راجع بياناتك قبل الإرسال 🎬</p>
-                  <button
-                    type="submit"
-                    disabled={sending || !form.name || !form.email || !form.portfolio_url}
-                    className="inline-flex items-center gap-3 rounded-full bg-gradient-primary px-8 py-4 text-primary-foreground font-medium hover:shadow-glow transition-all disabled:opacity-60 overflow-hidden group"
-                  >
-                    <span className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
-                    <span className="relative">{sending ? "جاري الإرسال..." : "إرسال الطلب"}</span>
-                    <Send size={18} className="relative group-hover:-translate-y-1 group-hover:translate-x-1 transition-transform" />
-                  </button>
-                </div>
-                
-                {error && <p className="mt-6 text-sm text-center text-destructive">{error}</p>}
-              </form>
-            )}
-          </Reveal>
+                  <div className="grid sm:grid-cols-2 gap-10">
+                    <div className="relative group">
+                      <input id="j-phone" type="tel" dir="ltr" value={form.phone} onChange={(e) => set("phone", e.target.value)}
+                        className="w-full bg-transparent border-b border-border pb-4 pt-2 text-foreground focus:outline-none focus:border-primary transition-colors peer placeholder-transparent text-left" placeholder="Phone" />
+                      <label htmlFor="j-phone" className="absolute right-0 top-2 text-muted-foreground text-sm transition-all peer-focus:-top-5 peer-focus:text-xs peer-focus:text-primary peer-valid:-top-5 peer-valid:text-xs cursor-text">رقم الهاتف</label>
+                    </div>
+                    <div className="relative group">
+                      <input id="j-loc" value={form.location} onChange={(e) => set("location", e.target.value)}
+                        className="w-full bg-transparent border-b border-border pb-4 pt-2 text-foreground focus:outline-none focus:border-primary transition-colors peer placeholder-transparent" placeholder="Location" />
+                      <label htmlFor="j-loc" className="absolute right-0 top-2 text-muted-foreground text-sm transition-all peer-focus:-top-5 peer-focus:text-xs peer-focus:text-primary peer-valid:-top-5 peer-valid:text-xs cursor-text">مكان الإقامة</label>
+                    </div>
+                  </div>
+
+                  <div className="relative group">
+                    <input id="j-port" type="url" required dir="ltr" value={form.portfolio_url} onChange={(e) => set("portfolio_url", e.target.value)}
+                      className="w-full bg-transparent border-b border-border pb-4 pt-2 text-foreground focus:outline-none focus:border-primary transition-colors peer placeholder-transparent text-left" placeholder="Portfolio URL" />
+                    <label htmlFor="j-port" className="absolute right-0 top-2 text-muted-foreground text-sm transition-all peer-focus:-top-5 peer-focus:text-xs peer-focus:text-primary peer-valid:-top-5 peer-valid:text-xs cursor-text">رابط معرض الأعمال (Behance, Vimeo, Drive)</label>
+                  </div>
+
+                  <div className="relative group pt-4">
+                    <textarea id="j-why" required rows={3} value={form.why} onChange={(e) => set("why", e.target.value)}
+                      className="w-full bg-transparent border-b border-border pb-4 pt-2 text-foreground focus:outline-none focus:border-primary transition-colors peer placeholder-transparent resize-none" placeholder="لماذا؟" />
+                    <label htmlFor="j-why" className="absolute right-0 top-4 text-muted-foreground text-sm transition-all peer-focus:-top-4 peer-focus:text-xs peer-focus:text-primary peer-valid:-top-4 peer-valid:text-xs cursor-text">لماذا فَيّ تحديداً؟</label>
+                  </div>
+
+                  <div className="relative group pt-4">
+                    <textarea id="j-edge" rows={3} value={form.edge} onChange={(e) => set("edge", e.target.value)}
+                      className="w-full bg-transparent border-b border-border pb-4 pt-2 text-foreground focus:outline-none focus:border-primary transition-colors peer placeholder-transparent resize-none" placeholder="الميزة؟" />
+                    <label htmlFor="j-edge" className="absolute right-0 top-4 text-muted-foreground text-sm transition-all peer-focus:-top-4 peer-focus:text-xs peer-focus:text-primary peer-valid:-top-4 peer-valid:text-xs cursor-text">ما الذي يميز أسلوبك عن غيرك؟</label>
+                  </div>
+
+                  <div className="flex items-center justify-between mt-8 pt-8">
+                    <p className="text-xs text-muted-foreground uppercase tracking-widest font-display">Awaiting your craft</p>
+                    <button
+                      type="submit"
+                      disabled={sending || !form.name || !form.email || !form.portfolio_url}
+                      className="inline-flex items-center gap-3 border border-border hover:border-primary bg-surface/50 hover:bg-primary px-8 py-4 rounded-full text-foreground hover:text-primary-foreground font-medium transition-all disabled:opacity-50 overflow-hidden group"
+                    >
+                      <span className="relative z-10">{sending ? "جاري الإرسال..." : "إرسال الطلب"}</span>
+                      <Send size={16} className="relative z-10 group-hover:-translate-y-1 group-hover:translate-x-1 transition-transform" />
+                    </button>
+                  </div>
+                  
+                  {error && <p className="text-sm text-destructive mt-2">{error}</p>}
+                </form>
+              )}
+            </Reveal>
+          </div>
         </div>
       </section>
 
