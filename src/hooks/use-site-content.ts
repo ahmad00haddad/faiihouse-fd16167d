@@ -67,13 +67,28 @@ export function useSiteContent(): SiteContent {
   const { data } = useQuery({
     queryKey: KEY,
     queryFn: fetchSiteContent,
-    staleTime: 60_000, // Cache for 1 minute — no need to refetch constantly
+    staleTime: 10_000,
     enabled: hydrated,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
     placeholderData: hydrated ? (readCache() ?? defaultContent) : defaultContent,
     initialData: undefined,
   });
+
+  // Restore realtime subscription so Admin changes reflect immediately on all screens
+  useEffect(() => {
+    const channel = supabase
+      .channel(`site-content-${Math.random().toString(36).slice(2)}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "site_content" },
+        () => qc.invalidateQueries({ queryKey: KEY })
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [qc]);
 
   return (hydrated ? (data ?? defaultContent) : defaultContent);
 }
