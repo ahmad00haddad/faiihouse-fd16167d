@@ -36,6 +36,7 @@ const aboutSchema = z.object({
 
 const contactSchema = z.object({
   phone: z.string().max(50),
+  phone2: z.string().max(50).optional(),
   email: z.string().max(200),
   address: z.string().max(300),
   instagram: z.string().max(500),
