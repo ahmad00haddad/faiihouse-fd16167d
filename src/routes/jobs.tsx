@@ -27,10 +27,10 @@ type FormState = {
 const blank: FormState = { name: "", email: "", phone: "", location: "", start_when: "", portfolio_url: "", why: "", skills: "", edge: "" };
 
 const roles = [
-  { id: "01", icon: Camera, title: "صُنّاع الصورة", desc: "مدراء تصوير، مصورون، ومصممو إضاءة يقدرون التكوين الفني.", image: "/faii/port-film1.webp" },
-  { id: "02", icon: Edit3, title: "السرد القصصي", desc: "كتاب سيناريو ونصوص إعلانية يتقنون تحويل الأفكار إلى قصص.", image: "/faii/port-ad3.webp" },
-  { id: "03", icon: Film, title: "فنانو المونتاج", desc: "خبراء مونتاج وتلوين ومؤثرات بصرية يهتمون بأدق التفاصيل.", image: "/faii/port-doc2.webp" },
-  { id: "04", icon: Sparkles, title: "المواهب الفريدة", desc: "نرحب دوماً بأي موهبة استثنائية ترى في نفسها إضافة لفريقنا.", image: "/faii/port-ezwiti.webp" },
+  { id: "01", icon: Camera, title: "صُنّاع الصورة", desc: "مدراء تصوير، مصورون، ومصممو إضاءة يقدرون التكوين الفني." },
+  { id: "02", icon: Edit3, title: "السرد القصصي", desc: "كتاب سيناريو ونصوص إعلانية يتقنون تحويل الأفكار إلى قصص." },
+  { id: "03", icon: Film, title: "فنانو المونتاج", desc: "خبراء مونتاج وتلوين ومؤثرات بصرية يهتمون بأدق التفاصيل." },
+  { id: "04", icon: Sparkles, title: "المواهب الفريدة", desc: "نرحب دوماً بأي موهبة استثنائية ترى في نفسها إضافة لفريقنا." },
 ];
 
 function JobsPage() {
@@ -111,12 +111,6 @@ function JobsPage() {
             {roles.map((r, i) => (
               <Reveal key={r.id} delay={i * 100} className="h-full">
                 <div className="grain-card group relative rounded-[2rem] overflow-hidden bg-surface aspect-[4/5] flex flex-col justify-end p-8 border border-border/50 hover:border-primary/50 transition-colors h-full">
-                  
-                  {/* Background Image */}
-                  <div className="absolute inset-0 z-0">
-                    <img src={r.image} alt={r.title} loading="lazy" className="w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-110 opacity-30 group-hover:opacity-70 mix-blend-luminosity group-hover:mix-blend-normal" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent" />
-                  </div>
                   
                   {/* Content */}
                   <div className="relative z-10">
