@@ -452,10 +452,12 @@ textarea{resize:vertical;min-height:80px;}
 /* PRINT */
 @media print{
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
-  html,body{background:white!important;}
+    @page { margin: 0; size: auto; }
+  html,body{background:white!important; margin: 10mm 15mm !important;}
   .header,.step-nav,.sidebar,.mobile-quote-bar,.modal-header,.modal-actions,.section:not(.print-target){display:none!important;}
-  .app,.main{display:block!important;}
-  .modal-overlay{position:static!important;opacity:1!important;background:none!important;padding:0!important;pointer-events:all!important;}
+  .app{display:none!important;}
+  .main{display:block!important;}
+  .modal-overlay{position:static!important;opacity:1!important;background:none!important;padding:0!important;pointer-events:all!important;display:block!important;}
   .modal-box{max-height:none!important;box-shadow:none!important;border:none!important;max-width:100%!important;}
   .quote-doc{background:white!important;color:#111!important;}
   .q-top{background:#f5f5f5!important;color:#111!important;}
@@ -474,6 +476,7 @@ textarea{resize:vertical;min-height:80px;}
   .q-footer-left .ty span{color:var(--primary)!important;}
   .q-footer-left .contact,.q-footer-right .cliq{color:#555!important;}
   .q-divider{background:linear-gradient(to right,var(--primary),transparent)!important;}
+  .quote-doc button{display:none!important;}
 }
 /* ═══ Micro-interactions ═══ */
 .type-card,.equip-card,.region-card,.post-option,.reel-tier{transition:transform .28s cubic-bezier(.2,.8,.2,1),border-color .28s,background .28s,box-shadow .28s;}
@@ -1610,35 +1613,24 @@ function renderTypeGrid() {
     </div>`).join('');
 }
 
-// Per-type default crew (roleId -> qty). Each type is fully independent.
-const CREW_PRESETS = {
-  reels:       {cinematographer:1},
-  interview:   {cinematographer:2, sound:1},
-  corporate:   {director:1, cinematographer:1, producer:1, cam_assistant:1},
-  commercial:  {director:1, cinematographer:1, producer:1, cam_assistant:1, gaffer:1, art_director:1},
-  documentary: {director:1, cinematographer:1, sound:1, location_scout:1},
-  shortfilm:   {director:1, cinematographer:1, producer:1, cam_assistant:1, gaffer:1, sound:1, main_actor:1},
-  event:       {cinematographer:2, photographer:1},
-  photovideo:  {cinematographer:1, photographer:1, art_director:1},
-  realestate:  {cinematographer:1, photographer:1},
-};
-
 function selectType(id) {
   state.projectType = id;
   const type = PROJECT_TYPES.find(t=>t.id===id);
 
-  // Drop any custom roles added for the previous type so nothing carries over
-  for(let i=ROLES.length-1;i>=0;i--){ if(String(ROLES[i].id).startsWith('custom_')) ROLES.splice(i,1); }
-
-  // Rebuild crew from scratch for this type only
-  const preset = CREW_PRESETS[id] || {};
-  const fresh = {};
+  // Set default crew
   ROLES.forEach(r=>{
-    const q = preset[r.id];
-    fresh[r.id] = {enabled: !!q, rate: r.rate, qty: q || 1};
+    let enabled = false;
+    let qty = 1;
+    if(id==='reels') {
+      enabled = r.id==='cinematographer';
+    } else if(id==='interview') {
+      if(r.id==='cinematographer') { enabled=true; qty=2; }
+      else if(r.id==='sound') { enabled=true; }
+    } else {
+      enabled = type.crew && type.crew.includes(r.id);
+    }
+    state.crew[r.id] = {enabled, rate:r.rate, qty};
   });
-  state.crew = fresh;
-
 
   // Set default equipment
   if(type.defaultEquip) {
@@ -2693,8 +2685,7 @@ function showPreview() {
           <p><strong>From:</strong></p>
           <p>${state.preparedBy}</p>
           <p>Faii House Production</p>
-          <p>Faii.House.jo@gmail.com</p>
-          <p>+962799256345</p>
+          <p>${state.customContact || 'saif.haimour.sh@gmail.com<br>0962797215987'}</p>
         </div>
         <div class="q-meta-block">
           ${state.clientName?`<p><strong>To:</strong></p><p>${state.clientName}</p>${state.clientCompany?`<p>${state.clientCompany}</p>`:''}`:''}
