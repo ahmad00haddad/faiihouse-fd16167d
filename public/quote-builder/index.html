@@ -460,6 +460,7 @@ textarea{resize:vertical;min-height:80px;}
   .modal-overlay{position:static!important;opacity:1!important;background:none!important;padding:0!important;pointer-events:all!important;display:block!important;}
   .modal-box{max-height:none!important;box-shadow:none!important;border:none!important;max-width:100%!important;}
   .quote-doc{background:white!important;color:#111!important;}
+  .q-meta{grid-template-columns: 1fr 1fr 1fr !important; display: grid !important;}
   .q-top{background:#f5f5f5!important;color:#111!important;}
   .q-title{color:var(--primary)!important;}
   .q-subtitle{color:#555!important;}
@@ -2682,21 +2683,21 @@ function showPreview() {
       <div class="q-subtitle">${state.projectTitle || type.name}</div>
       <div class="q-meta">
         <div class="q-meta-block">
-          <p><strong>From:</strong></p>
+          <p><strong dir="ltr">From:</strong></p>
           <p>${state.preparedBy}</p>
           <p>Faii House Production</p>
           <p>${state.customContact || 'Faii.House.jo@gmail.com<br>+962799256345<br>+962796016640'}</p>
         </div>
         <div class="q-meta-block">
-          ${state.clientName?`<p><strong>To:</strong></p><p>${state.clientName}</p>${state.clientCompany?`<p>${state.clientCompany}</p>`:''}`:''}
+          ${state.clientName?`<p><strong dir="ltr">To:</strong></p><p>${state.clientName}</p>${state.clientCompany?`<p>${state.clientCompany}</p>`:''}`:''}
         </div>
         <div class="q-meta-block" style="text-align:end;">
-          <p><strong>REF:</strong> ${refNumber}</p>
-          <p><strong>Date:</strong> ${today}</p>
-          <p><strong>Valid Until:</strong> ${expiryDate}</p>
-          <p><strong>Delivery:</strong> ${delivLabel}</p>
-          <p><strong>Days:</strong> ${state.days} shooting day${state.days>1?'s':''}</p>
-          ${state.projectType==='reels'?`<p><strong>Reels:</strong> ${state.reelCount}</p>`:''}
+          <p><strong dir="ltr">REF:</strong> ${refNumber}</p>
+          <p><strong dir="ltr">Date:</strong> ${today}</p>
+          <p><strong dir="ltr">Valid Until:</strong> ${expiryDate}</p>
+          <p><strong dir="ltr">Delivery:</strong> ${delivLabel}</p>
+          <p><strong dir="ltr">Days:</strong> ${state.days} shooting day${state.days>1?'s':''}</p>
+          ${state.projectType==='reels'?`<p><strong dir="ltr">Reels:</strong> ${state.reelCount}</p>`:''}
         </div>
       </div>
     </div>
