@@ -3124,27 +3124,9 @@ document.addEventListener('DOMContentLoaded', () => {
 <script>
 // 1. Audio System
 let audioCtx = null;
-function initAudio() { if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
-function playTick() {
-  try {
-    if(!audioCtx) return;
-    const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-    osc.connect(gain); gain.connect(audioCtx.destination);
-    osc.type = 'sine'; osc.frequency.setValueAtTime(800, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.05);
-    gain.gain.setValueAtTime(0.05, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
-    osc.start(audioCtx.currentTime); osc.stop(audioCtx.currentTime + 0.05);
-  } catch(e){}
-}
-function playSuccess() {
-  try {
-    if(!audioCtx) return;
-    const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-    osc.connect(gain); gain.connect(audioCtx.destination);
-    osc.type = 'triangle'; osc.frequency.setValueAtTime(400, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.2);
-    gain.gain.setValueAtTime(0.1, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
-    osc.start(audioCtx.currentTime); osc.stop(audioCtx.currentTime + 0.3);
-  } catch(e){}
-}
+function initAudio() { }
+function playTick() { }
+function playSuccess() { }
 
 // 2. Odometer
 function animateValue(obj, start, end, duration) {
@@ -3206,7 +3188,7 @@ window.updateQuote = function() {
 
 // 3. DOM Ready Injections
 document.addEventListener('DOMContentLoaded', () => {
-  document.body.addEventListener('click', initAudio, {once:true});
+  
 
   // Inject Ticker
   
