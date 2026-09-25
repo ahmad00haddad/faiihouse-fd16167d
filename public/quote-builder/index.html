@@ -2743,7 +2743,7 @@ function showPreview() {
              ${isOwnerMode ? 'contenteditable="true" spellcheck="false" onblur="state.customTerms=this.innerHTML;saveState();"' : ''} 
              style="${isOwnerMode ? 'outline:none; padding:12px; border:1px dashed var(--border); border-radius:8px; cursor:text; margin-bottom:0;' : 'margin-bottom:0;'}">
           ${state.customTerms ? state.customTerms : `— Video delivery: ${delivLabel}.<br>
-— This offer is valid until: <strong style="color:var(--text)">${expiryDate}</strong> (30 days from issue date).<br>
+— This offer is valid until: <strong>${expiryDate}</strong> (30 days from issue date).<br>
 — Client has the right to request changes · ${state.deliveryDays==='rush'?'1 revision':'2 revisions'} included.<br>
 ${paymentText}— Equipment rental and transportation fees are included in the total.<br>
 — The above price is final and tax-exempt.<br>
